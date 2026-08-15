@@ -4,15 +4,19 @@
     using System;
     using System.IO;
     using System.Linq;
-    using System.Web.Mvc;
-    using System.Web.WebPages;
+    using Microsoft.AspNetCore.Html;
 
     public static class FeatExtensions
     {
-        public static HelperResult RenderPrerequisites(this Feat feat, Func<FeatPrerequisite, MvcHtmlString> featPrerequisiteDecoration)
+        public static IHtmlContent RenderPrerequisites(this Feat feat, Func<FeatPrerequisite, IHtmlContent> featPrerequisiteDecoration)
         {
             object[] prerequisites = feat.Prerequisites;
-            return new HelperResult(w =>
+            return new HtmlContentBuilder().AppendHtml(new Microsoft.AspNetCore.Html.HtmlString(RenderPrerequisitesToString(prerequisites, featPrerequisiteDecoration)));
+        }
+
+        private static string RenderPrerequisitesToString(object[] prerequisites, Func<FeatPrerequisite, IHtmlContent> featPrerequisiteDecoration)
+        {
+            using (var w = new StringWriter())
             {
                 for (int i = 0; i < prerequisites.Length; i++)
                 {
@@ -40,16 +44,23 @@
                         }
                     }
                 }
-            });
+
+                return w.ToString();
+            }
         }
 
-        private static void RenderPrerequisite(FeatPrerequisite prerequisite, TextWriter writer, Func<FeatPrerequisite, MvcHtmlString> featPrerequisiteDecoration)
+        private static void RenderPrerequisite(FeatPrerequisite prerequisite, TextWriter writer, Func<FeatPrerequisite, IHtmlContent> featPrerequisiteDecoration)
         {
             var prereq = prerequisite;
             var inner = prereq.Description;
             if (prereq.Type == FeatPrerequisiteType.Feat)
             {
-                inner = featPrerequisiteDecoration(prereq).ToString();
+                var htmlContent = featPrerequisiteDecoration(prereq);
+                using (var sw = new StringWriter())
+                {
+                    htmlContent.WriteTo(sw, System.Text.Encodings.Web.HtmlEncoder.Default);
+                    inner = sw.ToString();
+                }
             }
 
             writer.Write("<span>");

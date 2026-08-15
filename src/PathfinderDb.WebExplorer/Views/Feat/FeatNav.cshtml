@@ -37,7 +37,7 @@
             <button id="addClass" class="btn btn-small" style="margin-bottom: 9px">
                 <i class="icon-plus"></i>
             </button>
-            @using (Html.BeginForm("Index", "Feat", this.Model.Query.Clone().ClearClassLevels().AsRouteValue(), FormMethod.Get, new RouteValueDictionary(new { id = @"addClassForm", style = "margin:0" })))
+            @using (Html.BeginForm("Index", "Feat", this.Model.Query.Clone().ClearClassLevels().AsRouteValue(), FormMethod.Get, null, new RouteValueDictionary(new { id = @"addClassForm", style = "margin:0" })))
             {
                 <input id="addClassLevels" name="ClassLevels" type="hidden" value="@this.Model.Query.ClassLevels" />
             }

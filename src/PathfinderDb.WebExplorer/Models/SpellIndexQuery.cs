@@ -4,7 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Web.Routing;
+using Microsoft.AspNetCore.Routing;
 
     public class SpellIndexQuery : Query
     {

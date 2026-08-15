@@ -27,9 +27,9 @@
                 <div class="nav-collapse">
                     <!-- .nav, .navbar-search, .navbar-form, etc -->
                     <ul class="nav">
-                        <li class="@(this.ViewContext.Controller.GetType().Name == "FeatController" ? "active" : "")">@Html.ActionLink("Dons", "Index", "Feat")
+                        <li class="@(this.ViewContext.RouteData.Values["controller"]?.ToString() == "Feat" ? "active" : "")">@Html.ActionLink("Dons", "Index", "Feat")
                         </li>
-                        <li class="@(this.ViewContext.Controller.GetType().Name == "SpellController" ? "active" : "")">@Html.ActionLink("Sorts", "Index", "Spell")
+                        <li class="@(this.ViewContext.RouteData.Values["controller"]?.ToString() == "Spell" ? "active" : "")">@Html.ActionLink("Sorts", "Index", "Spell")
                         </li>
                     </ul>
                 </div>

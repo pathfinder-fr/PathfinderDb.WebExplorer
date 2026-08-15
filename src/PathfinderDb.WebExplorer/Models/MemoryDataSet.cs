@@ -1,6 +1,5 @@
 ﻿using PathfinderDb.Schema;
 using System;
-using System.Web;
 using System.Xml;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +27,12 @@ namespace DbBrowser.Models
             get { return dataSets; }
         }
 
-        public static DataSet LoadDataSet(HttpServerUtilityBase server)
+        public static void Initialize(string contentRootPath)
+        {
+            LoadDataSet(contentRootPath);
+        }
+
+        public static DataSet LoadDataSet(string contentRootPath)
         {
             if (dataSet == null)
             {
@@ -38,7 +42,8 @@ namespace DbBrowser.Models
                     {
                         dataSet = new DataSet();
                         dataSets = new List<DataSet>();
-                        foreach (var ds in Directory.GetFiles(server.MapPath("~/App_Data"), "*.xml").Where(p => DataSetNames.Any(ds => ds == Path.GetFileNameWithoutExtension(p))).Select(p => LoadDataSet(p)))
+                        var appDataPath = Path.Combine(contentRootPath, "App_Data");
+                        foreach (var ds in Directory.GetFiles(appDataPath, "*.xml").Where(p => DataSetNames.Any(ds => ds == Path.GetFileNameWithoutExtension(p))).Select(p => LoadDataSetFromFile(p)))
                         {
                             dataSets.Add(ds);
                             dataSet.Add(ds);
@@ -50,7 +55,7 @@ namespace DbBrowser.Models
             return dataSet;
         }
 
-        public static DataSet LoadDataSet(string path)
+        public static DataSet LoadDataSetFromFile(string path)
         {
             using (var reader = XmlReader.Create(path))
             {

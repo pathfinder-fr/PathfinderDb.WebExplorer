@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DbBrowser.Controllers
 {
@@ -6,7 +7,8 @@ namespace DbBrowser.Controllers
     {
         public static PathfinderDb.Schema.DataSet DataSet(this Controller controller)
         {
-            return Models.MemoryDataSet.LoadDataSet(controller.Server);
+            var env = (IWebHostEnvironment)controller.HttpContext.RequestServices.GetService(typeof(IWebHostEnvironment));
+            return Models.MemoryDataSet.LoadDataSet(env.ContentRootPath);
         }
     }
 }
