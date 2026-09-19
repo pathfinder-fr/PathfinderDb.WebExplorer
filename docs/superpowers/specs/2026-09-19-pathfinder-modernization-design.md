@@ -101,11 +101,11 @@ Cette section documente précisément ce qui a été trouvé dans `D:\code\perso
 - Le dépôt local n'a qu'un seul commit observé (« Initialiser le corpus XML Pathfinder »), ce qui suggère une régénération complète périodique (pas de commits incrémentaux fins).
   **L'implémentation ne doit donc pas supposer un historique Git riche ni un diff incrémental fiable** : il faut traiter chaque nouvelle version comme un remplacement complet des fichiers de données, et recalculer les index/caches en conséquence.
 - Le dépôt fournit à la fois des exports `*.xml` (format `PathfinderDb.Schema`, normalisé via un schéma XSD, compatible avec l'ancien site) et des exports `*.json` plus récents et plus riches (`feats.json`, `spells.json`, `monsters.json`).
-  `[MAJ]` **Le statut du format XML est en cours de clarification avec le mainteneur du projet d'export `pf1-data`** : soit il continue à être généré en parallèle du JSON, soit il est supprimé. Préférence exprimée par le porteur de produit : **conserver et utiliser le XML tant qu'il continue d'être généré, car il est normalisé via un schéma (XSD)** — un schéma JSON équivalent n'existe pas encore pour les exports `.json` (envisagé côté `pf1-data`, non garanti aujourd'hui). En conséquence :
-  - le pipeline d'import doit supporter les deux formats derrière une même interface d'import (ex. `IDataSetSource`), avec sélection explicite du format en configuration ;
-  - tant que le XML reste disponible et schématisé, il doit être la source préférée par défaut pour la validation stricte à l'import (un document invalide au schéma XSD est rejeté avant d'atteindre le mapping métier) ;
-  - le JSON reste utilisable en repli, ou devient la source principale si le XML est supprimé côté `pf1-data`, ou si un schéma JSON équivalent est fourni (voir question ouverte correspondante) ;
-  - dans tous les cas, le modèle interne (`Feat`, `Spell`, `Monster`, …) doit rester indépendant du format d'entrée : le mapping XML→modèle et JSON→modèle doivent produire exactement le même modèle métier.
+  `[MAJ]` **Décision actée** : la nouvelle application consomme **exclusivement le format JSON**, désérialisé via `System.Text.Json` (avec source generation) pour un démarrage rapide sans coût de réflexion — c'est le critère de performance qui a tranché en faveur du JSON plutôt que du XML. Conséquences :
+  - **pas d'abstraction multi-format en v1** : l'`Import / normalization` cible uniquement `feats.json` / `spells.json` / `monsters.json` (+ `diagnostics.json` pour la validation qualité) ; l'ancien format `.xml` du dépôt n'est pas consommé par la nouvelle application ;
+  - l'absence de schéma JSON formel aujourd'hui est compensée par une **validation applicative explicite** à l'import (champs requis vérifiés par le mapping C# lui-même, échec clair et loggué si un champ obligatoire manque ou change de type), plutôt que par une validation de schéma externe (XSD) ;
+  - si `pf1-data` produit un jour un schéma JSON (JSON Schema) pour ses exports, ce schéma pourra être branché en complément de la validation applicative, sans remettre en cause le choix du format ;
+  - le statut futur du XML côté `pf1-data` (conservé ou supprimé) n'a plus d'impact sur cette application : elle ne le lit pas, qu'il continue d'exister ou non.
 - `diagnostics.json` / `diagnostics.md` / `diagnostics.csv` contiennent un **rapport qualité de l'extraction** (`CandidateCount`, `AnalyzedCount`, `ProducedCount`, `DiagnosticCount`,
   avec des entrées `Severity: info/warning/error` et des règles nommées comme `spell.candidate-not-spell`).
   Ce rapport doit être exploité par le pipeline d'import : au minimum, bloquer la publication si `ErrorCount > 0` sur une catégorie critique, et logguer/exposer les `WarningCount` pour suivi qualité dans le temps.
@@ -191,7 +191,7 @@ Points à trancher techniquement (cf. questions ouvertes) :
 ### Architecture proposée
 
 - `Data source` : clone Git de `pf1-data`, rafraîchi périodiquement en production (voir ci-dessus), monté en local via `D:\code\perso\pf\pf1-data` pour le développement.
-- `Import / normalization` : bibliothèque dédiée (projet `PathfinderDb.Data` ou équivalent) qui désérialise XML et/ou JSON selon le format disponible (via l'abstraction `IDataSetSource`, cf. « Nature du dépôt »), valide (schéma XSD si XML, `diagnostics.json` dans tous les cas), et construit des modèles internes typés + index par slug/lettre/section/CR/etc., identiques quelle que soit la source d'origine.
+- `Import / normalization` : bibliothèque dédiée (projet `PathfinderDb.Data` ou équivalent) qui désérialise les fichiers JSON (`System.Text.Json` + source generation), valide (champs requis vérifiés applicativement + `diagnostics.json` pour la qualité du corpus), et construit des modèles internes typés + index par slug/lettre/section/CR/etc.
 - `Content model` : entités `Feat`, `Spell`, `Monster`, `Source`, `Reference`, `Prerequisite` (avec support des groupes de choix), `SpellLevel`, indépendantes de la forme JSON source.
 - `Runtime app` : site web ASP.NET Core 10 (Razor Pages) qui expose des routes déterministes en lecture seule sur ces modèles.
 - `Cache layer` : Output Cache serveur (tags par entité) + en-têtes HTTP orientés CDN pour les pages stables ; pas de cache applicatif ad hoc supplémentaire nécessaire vu le faible volume de données.
@@ -361,14 +361,14 @@ Livrable testable : le projet est migré vers .NET 10 et la source des données 
 
 - projet ASP.NET Core 10 fonctionnel,
 - modèle de données internes pour dons, sorts, monstres et sources,
-- pipeline de chargement depuis le clone `pf1-data`,
-- validation schéma des exports JSON/XML,
+- pipeline de chargement depuis le clone `pf1-data` (fichiers JSON uniquement),
+- validation applicative des exports JSON (champs requis, cohérence des types, exploitation de `diagnostics.json`),
 - preuve que les données de production ne sont plus embarquées dans le repo web.
 
 Validation :
 
-- le site démarre sans dépendre des anciens XML du dépôt legacy,
-- la donnée est chargée depuis le clone `pf1-data` au build/déploiement,
+- le site démarre sans dépendre des anciens fichiers `App_Data/*.xml` du dépôt legacy,
+- la donnée est chargée depuis les fichiers JSON du clone `pf1-data` au build/déploiement,
 - les tests de chargement de données passent sur un jeu de données réaliste.
 
 ### Étape 2 — Performance et démarrage
@@ -496,7 +496,7 @@ Ces points ne sont pas bloquants pour démarrer l'étape 1, mais doivent être a
 5. ~~**Design visuel**~~ — **Tranché** : pas de préférence de style imposée par le porteur de produit. **À définir plus tard avec des mockups**, avant l'étape 5, via le companion visuel de brainstorming. À cette occasion, proposer plusieurs références de sites existants sobres/rapides à titre d'inspiration (ex. sites de documentation technique, wikis minimalistes) plutôt que de partir d'une page blanche.
 6. ~~**Fonctionnalités supprimées vs. différées**~~ — **Tranché** : suppression en v1 des recherches combinées de l'ancien site (attributs, classes, niveaux multiples pour les dons), **avec une note conservée pour réévaluation future** plutôt qu'une suppression définitive et irréversible. Cette note est conservée dans la section « À ne pas faire dans la v1 » ci-dessous, marquée comme réévaluable après la v1 plutôt que comme un renoncement permanent.
 7. ~~**AOT / ReadyToRun**~~ — **Tranché** : reste **ouvert et différé à l'étape 2**, à tester techniquement par l'agent d'implémentation selon la compatibilité réelle avec Razor Pages et l'hébergement en VM auto-hébergée (IIS/Kestrel). Aucune préférence imposée d'avance entre ReadyToRun et Full AOT ; le choix doit être documenté avec sa justification (mesure de démarrage à l'appui) au moment de l'étape 2.
-8. `[MAJ]` **Devenir du format XML et d'un futur schéma JSON** — en attente de clarification du mainteneur de `pf1-data` sur la poursuite ou non de la génération du XML (schématisé via XSD) en parallèle du JSON, et sur l'éventuelle production d'un schéma JSON équivalent. Tant que cette clarification n'est pas actée : concevoir l'import derrière une abstraction supportant les deux formats (voir « Nature du dépôt » ci-dessus), avec le XML comme source de validation stricte préférée par défaut s'il reste disponible.
+8. ~~**Devenir du format XML et d'un futur schéma JSON**~~ — **Tranché** : la nouvelle application reste sur le **format JSON**, pour la performance de désérialisation offerte par `System.Text.Json` (source generation, démarrage rapide sans réflexion). Le XML n'est plus consommé par cette application, indépendamment de ce que décidera le mainteneur de `pf1-data` sur son maintien. Si un schéma JSON formel est produit plus tard côté `pf1-data`, il pourra être ajouté en complément de la validation applicative déjà prévue (voir « Nature du dépôt » ci-dessus), sans remettre en cause ce choix de format.
 
 ## `[MAJ]` Traçabilité demande → livrables
 
@@ -531,7 +531,8 @@ Le projet est réussi si :
 - ne pas exposer des filtres “illimités” sans garde-fou,
 - ne pas recréer une architecture d’édition web pour un contenu qui doit rester stable et source-based,
 - ne pas ajouter de dépendances frontend lourdes,
-- ne pas embarquer de copies de fichiers de données (XML ou JSON) dans le dépôt applicatif : la donnée vient uniquement du clone `pf1-data` externe, jamais d'une copie committée dans ce repo (nuance par rapport à la V1 de cette spec : le format XML en tant que tel n'est pas proscrit, voir question ouverte n°8 — seul l'embarquement de données dans le repo web est interdit).
+- ne pas embarquer de copies de fichiers de données JSON dans le dépôt applicatif : la donnée vient uniquement du clone `pf1-data` externe, jamais d'une copie committée dans ce repo,
+- ne pas consommer le format XML historique du dépôt `pf1-data` (décision actée : JSON uniquement, via `System.Text.Json`, cf. question ouverte n°8),
 - `[MAJ]` filtres combinés avancés sur les dons (attributs, classes, niveaux multiples) : **supprimés en v1, mais réévaluables plus tard** — ne pas les considérer comme abandonnés définitivement (cf. question ouverte n°6, tranchée en ce sens) ; consigner cette suppression comme un choix de portée v1, pas comme un renoncement produit.
 
 ## Proposition de plan de mise en œuvre
