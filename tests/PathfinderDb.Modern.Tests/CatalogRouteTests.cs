@@ -49,6 +49,7 @@ public sealed class CatalogRouteTests
 
         Assert.Matches(@"\.catalog-list\s*\{[^}]*grid-template-columns:\s*repeat\(3,", stylesheet);
         Assert.Contains("min-height: 2.9rem", stylesheet);
+        Assert.Contains(".catalog-list > a,\r\n.catalog-list > li a", stylesheet);
         Assert.DoesNotContain(".bucket-nav", stylesheet);
         Assert.DoesNotContain("class=\"bucket-nav\"", monsters);
         Assert.DoesNotContain("class=\"bucket-nav\"", spells);
