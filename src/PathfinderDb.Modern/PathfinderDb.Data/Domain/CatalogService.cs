@@ -6,6 +6,7 @@ namespace PathfinderDb.Data.Domain;
 public sealed class CatalogService(IDataSnapshotProvider provider)
 {
     public const int PageSize = 50;
+    public string? SnapshotVersion => provider.Current?.Version;
 
     public CatalogPage<Feat>? GetFeats(string? initial, int page = 1) =>
         GetPage(provider.Current?.FeatsByInitial, NormalizeInitial(initial), page);

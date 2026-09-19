@@ -11,6 +11,9 @@ public sealed class DetailModel(CatalogService catalogs) : PageModel
     public IActionResult OnGet(string slug)
     {
         Spell = catalogs.GetSpell(slug);
+        if (Spell is not null && catalogs.SnapshotVersion is { } version)
+            if (CatalogCacheHeaders.Apply(Response, version, Request.Path + Request.QueryString))
+                return StatusCode(StatusCodes.Status304NotModified);
         return Spell is null ? NotFound() : Page();
     }
 }

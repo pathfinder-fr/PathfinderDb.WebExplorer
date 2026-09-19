@@ -13,6 +13,9 @@ public sealed class IndexModel(CatalogService catalogs) : PageModel
     {
         Buckets = catalogs.SpellBuckets;
         CatalogPage = catalogs.GetSpells(initial, page);
+        if (CatalogPage is not null && catalogs.SnapshotVersion is { } version)
+            if (CatalogCacheHeaders.Apply(Response, version, Request.Path + Request.QueryString))
+                return StatusCode(StatusCodes.Status304NotModified);
         return CatalogPage is null ? NotFound() : Page();
     }
 }

@@ -11,6 +11,9 @@ public sealed class ByChallengeRatingModel(CatalogService catalogs) : PageModel
     public IActionResult OnGet(string challengeRating, [FromQuery] int page = 1)
     {
         CatalogPage = catalogs.GetMonsters(challengeRating, page);
+        if (CatalogPage is not null && catalogs.SnapshotVersion is { } version)
+            if (CatalogCacheHeaders.Apply(Response, version, Request.Path + Request.QueryString))
+                return StatusCode(StatusCodes.Status304NotModified);
         return CatalogPage is null ? NotFound() : Page();
     }
 }

@@ -32,8 +32,12 @@ $env:PATHFINDER_DATA_ROOT = 'D:\code\perso\pf\pf1-data'
 dotnet test tests\PathfinderDb.Modern.IntegrationTests\PathfinderDb.Modern.IntegrationTests.csproj
 ```
 
-The daily Git refresh service, public catalog routes, output cache, UI work, and
-CDN invalidation are intentionally deferred to later increments.
+The daily Git refresh service, UI work, and CDN invalidation are intentionally
+deferred to later increments. Catalog responses now expose a shared public
+cache policy (`max-age=300`, `s-maxage=3600`, and
+`stale-while-revalidate=86400`) plus an ETag derived from the immutable
+snapshot version and request path. Matching `If-None-Match` requests return
+`304 Not Modified`; a new snapshot automatically produces new ETags.
 
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
