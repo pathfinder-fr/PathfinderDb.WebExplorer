@@ -73,6 +73,7 @@ public sealed class CatalogRouteTests
         Assert.Contains(".selection-list", stylesheet);
         Assert.Contains("display: flex", stylesheet);
         Assert.Contains("flex-wrap: wrap", stylesheet);
+        Assert.Contains("gap: .2rem .5rem", stylesheet);
         Assert.Matches(@"\.selection-list\s*\{[^}]*list-style:\s*none", stylesheet);
         Assert.Matches(@"\.selection-list\s*>\s*li\s*\{[^}]*border-radius:\s*\.6rem", stylesheet);
     }
