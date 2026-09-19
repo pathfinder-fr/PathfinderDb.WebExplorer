@@ -1,28 +1,29 @@
 @page
 @model IndexModel
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8" />
-    <title>Pathfinder FR DB</title>
-</head>
-<body>
-    <main>
-        <h1>Pathfinder FR DB</h1>
-        <p>État des données : <strong>@Model.Status.State</strong></p>
-        @if (Model.Status.Version is not null)
-        {
-            <p>Version : <code>@Model.Status.Version</code></p>
-            <ul>
-                <li>Dons : @Model.Status.FeatCount</li>
-                <li>Sorts : @Model.Status.SpellCount</li>
-                <li>Monstres : @Model.Status.MonsterCount</li>
-            </ul>
-        }
-        @if (Model.Status.Errors.Count > 0)
-        {
-            <p role="alert">Le catalogue est indisponible : @string.Join(" ", Model.Status.Errors)</p>
-        }
-    </main>
-</body>
-</html>
+@{
+    ViewData["Title"] = "Accueil";
+}
+<section class="page-card">
+    <p class="eyebrow">Base de référence Pathfinder</p>
+    <h1>Pathfinder FR DB</h1>
+    <p class="intro">Explorez les dons, sorts et monstres issus des exports publics Pathfinder.</p>
+    <p>État des données : <strong>@Model.Status.State</strong></p>
+    @if (Model.Status.Version is not null)
+    {
+        <p>Version : <code>@Model.Status.Version</code></p>
+        <div class="detail-grid">
+            <div><dt>Dons</dt><dd>@Model.Status.FeatCount</dd></div>
+            <div><dt>Sorts</dt><dd>@Model.Status.SpellCount</dd></div>
+            <div><dt>Monstres</dt><dd>@Model.Status.MonsterCount</dd></div>
+        </div>
+    }
+    <p>
+        <a class="button-link" href="/dons">Parcourir les dons</a>
+        <a class="button-link" href="/sorts">Parcourir les sorts</a>
+        <a class="button-link" href="/monstres">Parcourir les monstres</a>
+    </p>
+    @if (Model.Status.Errors.Count > 0)
+    {
+        <p role="alert">Le catalogue est indisponible : @string.Join(" ", Model.Status.Errors)</p>
+    }
+</section>

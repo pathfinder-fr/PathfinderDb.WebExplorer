@@ -15,6 +15,7 @@ builder.Services.AddHostedService<PathfinderDb.Web.DataRefreshService>();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+app.UseStaticFiles();
 app.UseOutputCache();
 app.MapRazorPages();
 app.Run();

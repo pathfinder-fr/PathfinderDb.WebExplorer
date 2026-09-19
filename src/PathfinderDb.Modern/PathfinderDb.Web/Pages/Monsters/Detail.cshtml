@@ -1,19 +1,17 @@
 @page "/monstres/{slug}"
 @model PathfinderDb.Web.Pages.Monsters.DetailModel
-<!doctype html>
-<html lang="fr">
-<head><meta charset="utf-8" /><title>@Model.Monster!.Name - Monstre</title></head>
-<body>
-<main>
-    <p><a href="/monstres">Tous les monstres</a></p>
+@{
+    ViewData["Title"] = Model.Monster!.Name;
+}
+<article class="page-card">
+    <p><a href="/monstres">← Tous les monstres</a></p>
+    <p class="eyebrow">Monstre</p>
     <h1>@Model.Monster!.Name</h1>
-    <dl>
-        <dt>CR</dt><dd>@Model.Monster.ChallengeRating</dd>
-        <dt>Type</dt><dd>@Model.Monster.Type</dd>
-        <dt>Environnement</dt><dd>@Model.Monster.Environment</dd>
-        <dt>Climat</dt><dd>@Model.Monster.Climate</dd>
+    <dl class="detail-grid">
+        <div><dt>CR</dt><dd>@Model.Monster.ChallengeRating</dd></div>
+        <div><dt>Type</dt><dd>@Model.Monster.Type</dd></div>
+        <div><dt>Environnement</dt><dd>@Model.Monster.Environment</dd></div>
+        <div><dt>Climat</dt><dd>@Model.Monster.Climate</dd></div>
     </dl>
     <p>Cette fiche est un résumé de catalogue : le jeu de données actuel ne fournit pas de statblock complet.</p>
-</main>
-</body>
-</html>
+</article>

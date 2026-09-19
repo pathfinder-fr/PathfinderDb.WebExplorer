@@ -32,8 +32,8 @@ $env:PATHFINDER_DATA_ROOT = 'D:\code\perso\pf\pf1-data'
 dotnet test tests\PathfinderDb.Modern.IntegrationTests\PathfinderDb.Modern.IntegrationTests.csproj
 ```
 
-The daily Git refresh service, UI work, and CDN invalidation are intentionally
-deferred to later increments. Catalog responses now expose a shared public
+The daily Git refresh service and CDN invalidation are implemented as optional
+runtime behaviors. Catalog responses now expose a shared public
 cache policy (`max-age=300`, `s-maxage=3600`, and
 `stale-while-revalidate=86400`) plus an ETag derived from the immutable
 snapshot version and request path. Matching `If-None-Match` requests return
@@ -60,6 +60,11 @@ ASP.NET Output Cache entries tagged `catalog`; invalid data never purges the
 previously valid cache. Catalog page models use this tag and the same policy
 as the CDN-facing headers, so the edge cache remains the external layer and
 the output cache is the local VM layer.
+
+The modern Razor Pages UI uses one shared responsive layout with keyboard-focus
+styles, accessible navigation labels, and compact catalogue/detail components.
+The visual layer is kept static and server-rendered so it does not add a
+client-side framework or reduce CDN cacheability.
 
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,

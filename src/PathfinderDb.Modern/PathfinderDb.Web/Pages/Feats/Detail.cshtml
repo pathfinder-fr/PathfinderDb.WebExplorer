@@ -1,15 +1,13 @@
 @page "/dons/detail/{slug}"
 @model PathfinderDb.Web.Pages.Feats.DetailModel
-<!doctype html>
-<html lang="fr">
-<head><meta charset="utf-8" /><title>@Model.Feat!.Name - Don</title></head>
-<body>
-<main>
-    <p><a href="/dons">Tous les dons</a></p>
+@{
+    ViewData["Title"] = Model.Feat!.Name;
+}
+<article class="page-card">
+    <p><a href="/dons">← Tous les dons</a></p>
+    <p class="eyebrow">Don</p>
     <h1>@Model.Feat!.Name</h1>
-    @if (Model.Feat.Types.Count > 0) { <p>Types : @string.Join(", ", Model.Feat.Types)</p> }
+    @if (Model.Feat.Types.Count > 0) { <p><strong>Types :</strong> @string.Join(", ", Model.Feat.Types)</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Description)) { <p>@Model.Feat.Description</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Benefit)) { <h2>Avantage</h2><p>@Model.Feat.Benefit</p> }
-</main>
-</body>
-</html>
+</article>

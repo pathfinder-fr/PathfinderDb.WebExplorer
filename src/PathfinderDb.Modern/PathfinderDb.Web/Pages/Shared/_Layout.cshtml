@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] is string title ? $"{title} · Pathfinder FR DB" : "Pathfinder FR DB")</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="shell header-inner">
+            <a class="brand" href="/">Pathfinder <span>FR DB</span></a>
+            <nav class="main-nav" aria-label="Navigation principale">
+                <a href="/dons">Dons</a>
+                <a href="/sorts">Sorts</a>
+                <a href="/monstres">Monstres</a>
+            </nav>
+        </div>
+    </header>
+    <main class="shell page-content">
+        @RenderBody()
+    </main>
+    <footer class="site-footer">
+        <div class="shell">Référence Pathfinder en français · données publiques</div>
+    </footer>
+</body>
+</html>
