@@ -37,6 +37,7 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
         }
 
         var paths = RequiredFiles.ToDictionary(x => x, x => Path.Combine(root, x), StringComparer.OrdinalIgnoreCase);
+        var labelsPath = Path.Combine(root, "labels.json");
         foreach (var path in paths.Values.Where(path => !File.Exists(path)))
             validation.Errors.Add($"Required data file is missing: {path}");
         if (!validation.IsValid)
@@ -47,11 +48,19 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             var feats = await DeserializeAsync<FeatDocument>(paths["feats.json"], PathfinderJsonContext.Default.FeatDocument, cancellationToken);
             var spells = await DeserializeAsync<SpellDocument>(paths["spells.json"], PathfinderJsonContext.Default.SpellDocument, cancellationToken);
             var monsters = await DeserializeAsync<MonsterDocument>(paths["monsters.json"], PathfinderJsonContext.Default.MonsterDocument, cancellationToken);
+            var labels = File.Exists(labelsPath)
+                ? await DeserializeAsync<LabelDocument>(labelsPath, PathfinderJsonContext.Default.LabelDocument, cancellationToken)
+                : null;
             if (feats.Feats is null) validation.Errors.Add("feats.json must contain a Feats array.");
             if (spells.Spells is null) validation.Errors.Add("spells.json must contain a Spells array.");
             if (monsters.Monsters is null) validation.Errors.Add("monsters.json must contain a Monsters array.");
             if (!validation.IsValid) return new(null, validation, null);
             var sources = MergeSources(feats.Sources, spells.Sources, monsters.Sources, validation);
+            var labelValues = labels?.Labels ?? feats.Labels ?? spells.Labels ?? monsters.Labels ?? [];
+            if (labels is not null && labels.Labels is null)
+                validation.Errors.Add("labels.json must contain a Labels array.");
+            if (!validation.IsValid) return new(null, validation, null);
+            var labelCatalog = new LabelCatalog(labelValues);
             var featModels = MapFeats(feats.Feats, sources, validation);
             var spellModels = MapSpells(spells.Spells, sources, validation);
             var monsterModels = MapMonsters(monsters.Monsters, sources, validation);
@@ -62,8 +71,9 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             if (!validation.IsValid)
                 return new(null, validation, null);
 
-            var version = await ComputeVersionAsync(paths.Values, cancellationToken);
-            return new(new DataSnapshot(featModels, spellModels, monsterModels, sources.Values, version), validation, version);
+            var versionPaths = labels is null ? paths.Values : paths.Values.Append(labelsPath);
+            var version = await ComputeVersionAsync(versionPaths, cancellationToken);
+            return new(new DataSnapshot(featModels, spellModels, monsterModels, sources.Values, version, labelCatalog), validation, version);
         }
         catch (JsonException ex)
         {

@@ -9,13 +9,15 @@ public sealed class DataSnapshot
         IEnumerable<Spell> spells,
         IEnumerable<Monster> monsters,
         IEnumerable<Source> sources,
-        string version)
+        string version,
+        LabelCatalog? labels = null)
     {
         Version = string.IsNullOrWhiteSpace(version) ? throw new ArgumentException("A snapshot version is required.", nameof(version)) : version;
         Feats = feats.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
         Spells = spells.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
         Monsters = monsters.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
         Sources = sources.OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase).ToArray();
+        Labels = labels ?? new LabelCatalog([]);
         FeatsById = ReadOnlyDictionary(Feats.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase));
         SpellsById = ReadOnlyDictionary(Spells.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase));
         MonstersById = ReadOnlyDictionary(Monsters.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase));
@@ -40,6 +42,7 @@ public sealed class DataSnapshot
     public IReadOnlyList<Spell> Spells { get; }
     public IReadOnlyList<Monster> Monsters { get; }
     public IReadOnlyList<Source> Sources { get; }
+    public LabelCatalog Labels { get; }
     public IReadOnlyList<string> SpellLists { get; }
     public IReadOnlyDictionary<string, Feat> FeatsById { get; }
     public IReadOnlyDictionary<string, Spell> SpellsById { get; }

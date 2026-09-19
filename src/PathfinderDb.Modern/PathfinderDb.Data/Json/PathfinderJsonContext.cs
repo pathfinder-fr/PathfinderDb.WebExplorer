@@ -7,6 +7,7 @@ namespace PathfinderDb.Data.Json;
 [JsonSerializable(typeof(FeatDocument))]
 [JsonSerializable(typeof(SpellDocument))]
 [JsonSerializable(typeof(MonsterDocument))]
+[JsonSerializable(typeof(LabelDocument))]
 public partial class PathfinderJsonContext : JsonSerializerContext
 {
 }

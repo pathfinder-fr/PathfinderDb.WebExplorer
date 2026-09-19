@@ -8,6 +8,8 @@ public sealed class MonsterDocument
     public List<MonsterJson>? Monsters { get; set; }
     [JsonPropertyName("Sources")]
     public List<SourceJson>? Sources { get; set; }
+    [JsonPropertyName("Labels")]
+    public List<LabelJson>? Labels { get; set; }
 }
 
 public sealed class MonsterJson

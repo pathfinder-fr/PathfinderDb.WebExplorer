@@ -29,6 +29,7 @@ public sealed class RealPf1DataTests
         Assert.NotEmpty(result.Snapshot.Spells);
         Assert.NotEmpty(result.Snapshot.Monsters);
         Assert.NotEmpty(result.Snapshot.Sources);
+        Assert.Equal("Invocation", result.Snapshot.Labels.Get("spellSchool", "conjuration"));
         Assert.False(string.IsNullOrWhiteSpace(result.Version));
         Assert.True(result.Snapshot.Feats.Count > 100);
         Assert.True(result.Snapshot.Spells.Count > 100);

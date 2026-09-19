@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="PathfinderDb.Schema" Version="2.1.0" />
   </ItemGroup>
 </Project>

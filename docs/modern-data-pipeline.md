@@ -7,11 +7,19 @@ legacy MVC application. It reads only the three root exports from an external
 * `feats.json`
 * `spells.json`
 * `monsters.json`
+* `labels.json` (generated shared technical-label catalogue)
 
 Configure the clone with `PathfinderData:RootPath` (for example
 `D:\code\perso\pf\pf1-data`), or set `PathfinderData__RootPath` in an environment.
 The clone is deliberately not copied into the application output or committed to
 this repository.
+
+`labels.json` is produced by `pf1-tools` alongside the exports. It contains
+domain/key pairs and translations such as `spellSchool/conjuration` →
+`Invocation`. The loader includes this file in the snapshot version when it is
+present and also accepts the labels embedded in the root exports for
+compatibility with older generated clones. `PathfinderDb.Schema` 2.1.0 is used
+for the official `DataSet.GetLabel` fallback behavior.
 
 The data library uses `System.Text.Json` source generation, validates required
 identifiers, source references, spell levels, and duplicate identifiers, then
@@ -116,11 +124,11 @@ The current monster exports contain no item-level origin references, so monster
 pages intentionally do not display invented per-creature links.
 
 Technical category values remain canonical in the snapshot and URLs, but the
-Razor presentation layer translates known values for readers. For example,
-`um` is displayed as `L’art de la magie`, `bard` as `Barde`, `Conjuration` as
-`Invocation`, and `Fey` as `Fées`. The mappings reuse the legacy application's
-French terminology where available and fall back to the original value for
-new or unknown data values, so dynamic catalog discovery is preserved.
+Razor presentation layer translates them for readers through the generated
+label catalogue. For example, `Conjuration` is displayed as `Invocation` and
+`Fey` as `Fées`; sources and spell-list identifiers without a generated label
+retain the existing French terminology mappings. Missing or new values fall
+back to the original value, so dynamic catalog discovery is preserved.
 
 Monster challenge-rating route values use invariant decimal formatting (for
 example `1.5`) for both catalogue links and route buckets, regardless of the

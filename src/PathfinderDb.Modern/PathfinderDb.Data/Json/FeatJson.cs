@@ -9,6 +9,8 @@ public sealed class FeatDocument
     public List<FeatJson>? Feats { get; set; }
     [JsonPropertyName("Sources")]
     public List<SourceJson>? Sources { get; set; }
+    [JsonPropertyName("Labels")]
+    public List<LabelJson>? Labels { get; set; }
 }
 
 public sealed class FeatJson

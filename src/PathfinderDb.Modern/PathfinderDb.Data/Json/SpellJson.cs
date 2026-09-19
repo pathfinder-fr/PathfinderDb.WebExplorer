@@ -11,6 +11,8 @@ public sealed class SpellDocument
     public List<SourceJson>? Sources { get; set; }
     [JsonPropertyName("SpellLists")]
     public List<JsonElement>? SpellLists { get; set; }
+    [JsonPropertyName("Labels")]
+    public List<LabelJson>? Labels { get; set; }
 }
 
 public sealed class SpellJson

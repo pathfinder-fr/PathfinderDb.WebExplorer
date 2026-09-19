@@ -6,10 +6,12 @@ namespace PathfinderDb.Modern.Tests;
 
 public sealed class CatalogTextTests
 {
+    private readonly CatalogText _text = new();
+
     [Fact]
     public void Formats_challenge_rating_with_invariant_decimal_separator()
     {
-        var text = CatalogText.FormatChallengeRating(1.5m);
+        var text = _text.FormatChallengeRating(1.5m);
 
         Assert.Equal("1.5", text);
     }
@@ -17,7 +19,7 @@ public sealed class CatalogTextTests
     [Fact]
     public void Omits_decimal_suffix_for_integer_challenge_rating()
     {
-        var text = CatalogText.FormatChallengeRating(14.0m);
+        var text = _text.FormatChallengeRating(14.0m);
 
         Assert.Equal("14", text);
     }
@@ -35,7 +37,7 @@ public sealed class CatalogTextTests
                 new Prerequisite("Skill", null, "Acrobatics", 5, null, [])
             ]);
 
-        var text = CatalogText.FormatPrerequisite(prerequisite);
+        var text = _text.FormatPrerequisite(prerequisite);
 
         Assert.Contains("Feat", text);
         Assert.Contains("Combat Expertise", text);
@@ -50,7 +52,7 @@ public sealed class CatalogTextTests
     [InlineData("unknown-type", "unknown-type")]
     public void Formats_monster_types_in_french_with_unknown_fallback(string value, string expected)
     {
-        Assert.Equal(expected, CatalogText.FormatMonsterType(value));
+        Assert.Equal(expected, _text.FormatMonsterType(value));
     }
 
     [Theory]
@@ -59,7 +61,7 @@ public sealed class CatalogTextTests
     [InlineData("unknown-source", "unknown-source")]
     public void Formats_sources_in_french_with_unknown_fallback(string value, string expected)
     {
-        Assert.Equal(expected, CatalogText.FormatSource(value));
+        Assert.Equal(expected, _text.FormatSource(value));
     }
 
     [Theory]
@@ -69,7 +71,7 @@ public sealed class CatalogTextTests
     [InlineData("unknown-class", "unknown-class")]
     public void Formats_spell_lists_in_french_with_unknown_fallback(string value, string expected)
     {
-        Assert.Equal(expected, CatalogText.FormatSpellList(value));
+        Assert.Equal(expected, _text.FormatSpellList(value));
     }
 
     [Theory]
@@ -78,7 +80,7 @@ public sealed class CatalogTextTests
     [InlineData("unknown-school", "unknown-school")]
     public void Formats_spell_schools_in_french_with_unknown_fallback(string value, string expected)
     {
-        Assert.Equal(expected, CatalogText.FormatSpellSchool(value));
+        Assert.Equal(expected, _text.FormatSpellSchool(value));
     }
 
     [Theory]
@@ -87,6 +89,6 @@ public sealed class CatalogTextTests
     [InlineData("unknown-feat-type", "unknown-feat-type")]
     public void Formats_feat_types_in_french_with_unknown_fallback(string value, string expected)
     {
-        Assert.Equal(expected, CatalogText.FormatFeatType(value));
+        Assert.Equal(expected, _text.FormatFeatType(value));
     }
 }
