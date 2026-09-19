@@ -1,5 +1,6 @@
 using PathfinderDb.Data.Domain;
 using PathfinderDb.Data.Runtime;
+using System.Globalization;
 using Xunit;
 
 namespace PathfinderDb.Modern.Tests;
@@ -56,6 +57,31 @@ public sealed class CatalogServiceTests
         Assert.Equal("Animal", byType.Bucket);
         Assert.Equal(2, bySource!.TotalCount);
         Assert.Equal(["Advanced", "Bestiary"], service.MonsterSourceBuckets);
+    }
+
+    [Fact]
+    public void Monster_challenge_rating_bucket_uses_invariant_route_format()
+    {
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [],
+            [],
+            [new Monster("fractional", "Fractional", 1.5m, null, null, null, null)],
+            [],
+            "version")));
+        var previousCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+
+            var page = service.GetMonsters("1.5");
+
+            Assert.NotNull(page);
+            Assert.Equal("1.5", page!.Bucket);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previousCulture;
+        }
     }
 
     private sealed class TestProvider(DataSnapshot snapshot) : IDataSnapshotProvider

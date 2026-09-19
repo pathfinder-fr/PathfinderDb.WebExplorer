@@ -75,7 +75,11 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
             return null;
 
         return new CatalogPage<T>(
-            bucket.ToString()!,
+            bucket switch
+            {
+                decimal decimalBucket => decimalBucket.ToString(CultureInfo.InvariantCulture),
+                _ => bucket.ToString()!
+            },
             page,
             pageCount,
             items.Count,

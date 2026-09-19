@@ -11,7 +11,7 @@
     <ul class="catalog-list">
         @foreach (var challengeRating in Model.ChallengeRatings)
         {
-            <li><a href="/monstres/cr/@challengeRating">@challengeRating</a></li>
+            <li><a href="/monstres/cr/@CatalogText.FormatChallengeRating(challengeRating)">@CatalogText.FormatChallengeRating(challengeRating)</a></li>
         }
     </ul>
     <h2>Par type</h2>

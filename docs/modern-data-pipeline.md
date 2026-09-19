@@ -81,6 +81,10 @@ JSON exports, including prerequisite choices, normal text, source, spell
 components, target, casting time, and localization values. Missing optional
 fields remain omitted rather than rendered as empty placeholders.
 
+Monster challenge-rating route values use invariant decimal formatting (for
+example `1.5`) for both catalogue links and route buckets, regardless of the
+server's current UI culture.
+
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
 normalization, validation, version hashing, and snapshot index construction.

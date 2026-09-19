@@ -5,6 +5,9 @@ namespace PathfinderDb.Web;
 
 public static class CatalogText
 {
+    public static string FormatChallengeRating(decimal challengeRating) =>
+        challengeRating.ToString(CultureInfo.InvariantCulture);
+
     public static string FormatPrerequisite(Prerequisite prerequisite)
     {
         var parts = new List<string>();

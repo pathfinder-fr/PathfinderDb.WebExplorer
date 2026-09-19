@@ -7,6 +7,14 @@ namespace PathfinderDb.Modern.Tests;
 public sealed class CatalogTextTests
 {
     [Fact]
+    public void Formats_challenge_rating_with_invariant_decimal_separator()
+    {
+        var text = CatalogText.FormatChallengeRating(1.5m);
+
+        Assert.Equal("1.5", text);
+    }
+
+    [Fact]
     public void Formats_nested_feat_prerequisites_for_detail_pages()
     {
         var prerequisite = new Prerequisite(
