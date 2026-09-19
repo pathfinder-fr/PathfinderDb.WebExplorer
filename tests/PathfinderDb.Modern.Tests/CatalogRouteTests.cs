@@ -32,4 +32,15 @@ public sealed class CatalogRouteTests
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", feats);
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", spells);
     }
+
+    [Fact]
+    public void Inline_bucket_lists_hide_default_list_markers()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var stylesheet = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+
+        Assert.Matches(@"\.bucket-nav\s*\{[^}]*list-style:\s*none", stylesheet);
+    }
 }

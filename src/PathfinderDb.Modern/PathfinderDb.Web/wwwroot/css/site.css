@@ -98,6 +98,8 @@ h2 { margin-top: 2rem; }
     flex-wrap: wrap;
     gap: .4rem;
     margin: 1.5rem 0;
+    padding: 0;
+    list-style: none;
 }
 .bucket-nav a {
     min-width: 2.35rem;
