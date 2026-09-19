@@ -28,6 +28,21 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
     public CatalogPage<Monster>? GetMonstersBySource(string? source, int page = 1) =>
         GetPage(provider.Current?.MonstersBySource, NormalizeBucket(source), page);
 
+    public CatalogPage<Spell>? GetSpellsBySchool(string? school, int page = 1) =>
+        GetPage(provider.Current?.SpellsBySchool, NormalizeBucket(school), page);
+
+    public CatalogPage<Spell>? GetSpellsByList(string? list, int page = 1) =>
+        GetPage(provider.Current?.SpellsByList, NormalizeBucket(list), page);
+
+    public CatalogPage<Spell>? GetSpellsBySource(string? source, int page = 1) =>
+        GetPage(provider.Current?.SpellsBySource, NormalizeBucket(source), page);
+
+    public CatalogPage<Feat>? GetFeatsByType(string? type, int page = 1) =>
+        GetPage(provider.Current?.FeatsByType, NormalizeBucket(type), page);
+
+    public CatalogPage<Feat>? GetFeatsBySource(string? source, int page = 1) =>
+        GetPage(provider.Current?.FeatsBySource, NormalizeBucket(source), page);
+
     public Feat? GetFeat(string slug) => provider.Current?.FeatsById.GetValueOrDefault(slug);
     public Spell? GetSpell(string slug) => provider.Current?.SpellsById.GetValueOrDefault(slug);
     public Monster? GetMonster(string slug) => provider.Current?.MonstersById.GetValueOrDefault(slug);
@@ -46,6 +61,21 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
 
     public IReadOnlyList<string> MonsterSourceBuckets =>
         provider.Current?.MonstersBySource.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> SpellSchoolBuckets =>
+        provider.Current?.SpellsBySchool.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> SpellListBuckets =>
+        provider.Current?.SpellsByList.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> SpellSourceBuckets =>
+        provider.Current?.SpellsBySource.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> FeatTypeBuckets =>
+        provider.Current?.FeatsByType.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> FeatSourceBuckets =>
+        provider.Current?.FeatsBySource.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
 
     private static CatalogPage<T>? GetPage<T, TKey>(
         IReadOnlyDictionary<TKey, IReadOnlyList<T>>? buckets,

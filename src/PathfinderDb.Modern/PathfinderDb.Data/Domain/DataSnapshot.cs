@@ -25,8 +25,13 @@ public sealed class DataSnapshot
         FeatsByInitial = BuildInitialIndex(Feats);
         SpellsByInitial = BuildInitialIndex(Spells);
         MonstersByChallengeRating = BuildChallengeRatingIndex(Monsters);
-        MonstersByType = BuildMonsterStringIndex(Monsters, monster => monster.Type);
-        MonstersBySource = BuildMonsterStringIndex(Monsters, monster => monster.Source?.Id);
+        MonstersByType = BuildStringIndex(Monsters, monster => [monster.Type]);
+        MonstersBySource = BuildStringIndex(Monsters, monster => [monster.Source?.Id]);
+        SpellsBySchool = BuildStringIndex(Spells, spell => [spell.School]);
+        SpellsByList = BuildStringIndex(Spells, spell => spell.Levels.Select(level => level.List));
+        SpellsBySource = BuildStringIndex(Spells, spell => [spell.Source?.Id]);
+        FeatsByType = BuildStringIndex(Feats, feat => feat.Types);
+        FeatsBySource = BuildStringIndex(Feats, feat => [feat.Source?.Id]);
     }
 
     public string Version { get; }
@@ -44,6 +49,11 @@ public sealed class DataSnapshot
     public IReadOnlyDictionary<decimal, IReadOnlyList<Monster>> MonstersByChallengeRating { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersByType { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersBySource { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsBySchool { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsByList { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsBySource { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsByType { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsBySource { get; }
 
     private static IReadOnlyDictionary<string, T> ReadOnlyDictionary<T>(Dictionary<string, T> value) =>
         new ReadOnlyDictionary<string, T>(value);
@@ -77,16 +87,17 @@ public sealed class DataSnapshot
                 group => group.Key,
                 group => (IReadOnlyList<Monster>)group.ToArray()));
 
-    private static IReadOnlyDictionary<string, IReadOnlyList<Monster>> BuildMonsterStringIndex(
-        IEnumerable<Monster> monsters,
-        Func<Monster, string?> selector) =>
-        new ReadOnlyDictionary<string, IReadOnlyList<Monster>>(monsters
-            .Select(monster => (Monster: monster, Key: selector(monster)))
-            .Where(value => !string.IsNullOrWhiteSpace(value.Key))
+    private static IReadOnlyDictionary<string, IReadOnlyList<T>> BuildStringIndex<T>(
+        IEnumerable<T> items,
+        Func<T, IEnumerable<string?>> selector) =>
+        new ReadOnlyDictionary<string, IReadOnlyList<T>>(items
+            .SelectMany(item => selector(item)
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => (Item: item, Key: value!.Trim())))
             .GroupBy(value => value.Key!, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(
                 group => group.Key,
-                group => (IReadOnlyList<Monster>)group.Select(value => value.Monster).ToArray(),
+                group => (IReadOnlyList<T>)group.Select(value => value.Item).Distinct().ToArray(),
                 StringComparer.OrdinalIgnoreCase));
 
     private static string InitialBucket(string name)

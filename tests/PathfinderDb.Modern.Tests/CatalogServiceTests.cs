@@ -100,6 +100,24 @@ public sealed class CatalogServiceTests
         Assert.Equal("14", page!.Bucket);
     }
 
+    [Fact]
+    public void Spell_and_feat_dimension_queries_are_case_insensitive_and_paginated()
+    {
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [new Feat("combat-feat", "Combat Feat", ["Combat"], [], null, null, null, new Source("core", []))],
+            [new Spell("spell", "Spell", "Evocation", [new SpellLevel("psychiste", 1)], [], null, null, null, new Source("core", []), new Dictionary<string, string>())],
+            [],
+            [new Source("core", [])],
+            "version")));
+
+        Assert.Equal("Evocation", service.GetSpellsBySchool("evocation")!.Bucket);
+        Assert.Equal("psychiste", service.GetSpellsByList("PSYCHISTE")!.Bucket);
+        Assert.Equal("core", service.GetSpellsBySource("CORE")!.Bucket);
+        Assert.Equal("Combat", service.GetFeatsByType("combat")!.Bucket);
+        Assert.Equal("core", service.GetFeatsBySource("CORE")!.Bucket);
+        Assert.Null(service.GetSpellsBySchool("missing"));
+    }
+
     private sealed class TestProvider(DataSnapshot snapshot) : IDataSnapshotProvider
     {
         public DataSnapshot? Current => snapshot;
