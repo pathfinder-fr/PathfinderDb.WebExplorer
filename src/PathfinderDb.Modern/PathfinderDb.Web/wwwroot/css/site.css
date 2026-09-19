@@ -126,11 +126,23 @@ h2 { margin-top: 2rem; }
     flex-wrap: wrap;
     gap: .2rem 1.25rem;
     margin: .75rem 0 1.25rem;
-    padding-left: 1.25rem;
-    list-style: disc;
+    padding: 0;
+    list-style: none;
 }
-.selection-list > li { width: max-content; max-width: 100%; }
-.selection-list a { color: var(--accent-dark); }
+.selection-list > li {
+    width: max-content;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: .6rem;
+    background: var(--surface-alt);
+}
+.selection-list a {
+    display: block;
+    padding: .35rem .7rem;
+    color: var(--accent-dark);
+    text-decoration: none;
+}
+.selection-list > li:hover { border-color: var(--accent); background: #fff; }
 .pagination {
     display: flex;
     align-items: center;
