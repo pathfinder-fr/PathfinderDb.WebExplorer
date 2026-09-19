@@ -55,7 +55,11 @@ Enable it explicitly with:
 
 Git failures are logged and do not trigger a reload, while data validation
 failures continue to use the snapshot provider's existing atomic/degraded
-behavior.
+behavior. When a new snapshot becomes `Ready`, the server purges the
+ASP.NET Output Cache entries tagged `catalog`; invalid data never purges the
+previously valid cache. Catalog page models use this tag and the same policy
+as the CDN-facing headers, so the edge cache remains the external layer and
+the output cache is the local VM layer.
 
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,

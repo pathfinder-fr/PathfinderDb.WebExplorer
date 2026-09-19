@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.OutputCaching;
 using PathfinderDb.Data.Domain;
 
 namespace PathfinderDb.Web.Pages.Spells;
 
+[OutputCache(PolicyName = "Catalog")]
 public sealed class DetailModel(CatalogService catalogs) : PageModel
 {
     public Spell? Spell { get; private set; }

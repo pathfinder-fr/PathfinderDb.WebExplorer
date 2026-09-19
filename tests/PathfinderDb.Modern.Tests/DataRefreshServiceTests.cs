@@ -14,10 +14,12 @@ public sealed class DataRefreshServiceTests
     public async Task Reloads_snapshot_after_successful_git_pull()
     {
         var git = new FakeGitRepository(GitPullResult.Success("updated"));
-        var provider = new FakeSnapshotProvider();
+        var provider = new FakeSnapshotProvider(DataLoadState.Ready);
+        var cache = new FakeCacheInvalidator();
         var service = new DataRefreshService(
             git,
             provider,
+            cache,
             Options.Create(new PathfinderDataOptions
             {
                 RootPath = "D:\\data",
@@ -30,16 +32,19 @@ public sealed class DataRefreshServiceTests
         Assert.True(result);
         Assert.Equal(1, git.PullCount);
         Assert.Equal(1, provider.ReloadCount);
+        Assert.Equal(1, cache.InvalidationCount);
     }
 
     [Fact]
     public async Task Keeps_existing_snapshot_when_git_pull_fails()
     {
         var git = new FakeGitRepository(GitPullResult.Failure("network unavailable"));
-        var provider = new FakeSnapshotProvider();
+        var provider = new FakeSnapshotProvider(DataLoadState.Ready);
+        var cache = new FakeCacheInvalidator();
         var service = new DataRefreshService(
             git,
             provider,
+            cache,
             Options.Create(new PathfinderDataOptions
             {
                 RootPath = "D:\\data",
@@ -52,6 +57,7 @@ public sealed class DataRefreshServiceTests
         Assert.False(result);
         Assert.Equal(1, git.PullCount);
         Assert.Equal(0, provider.ReloadCount);
+        Assert.Equal(0, cache.InvalidationCount);
     }
 
     [Fact]
@@ -61,6 +67,28 @@ public sealed class DataRefreshServiceTests
 
         Assert.False(result.Succeeded);
         Assert.NotEmpty(result.Error);
+    }
+
+    [Fact]
+    public async Task Does_not_invalidate_cache_when_reload_is_unavailable()
+    {
+        var git = new FakeGitRepository(GitPullResult.Success("updated"));
+        var provider = new FakeSnapshotProvider(DataLoadState.Unavailable);
+        var cache = new FakeCacheInvalidator();
+        var service = new DataRefreshService(
+            git,
+            provider,
+            cache,
+            Options.Create(new PathfinderDataOptions
+            {
+                RootPath = "D:\\data",
+                RefreshEnabled = true
+            }),
+            NullLogger<DataRefreshService>.Instance);
+
+        await service.RefreshOnceAsync();
+
+        Assert.Equal(0, cache.InvalidationCount);
     }
 
     private sealed class FakeGitRepository(GitPullResult result) : IGitRepository
@@ -74,11 +102,13 @@ public sealed class DataRefreshServiceTests
         }
     }
 
-    private sealed class FakeSnapshotProvider : IDataSnapshotProvider
+    private sealed class FakeSnapshotProvider(DataLoadState state) : IDataSnapshotProvider
     {
         public int ReloadCount { get; private set; }
         public DataSnapshot? Current => null;
-        public DataLoadStatus Status => DataLoadStatus.LoadingStatus();
+        public DataLoadStatus Status => state == DataLoadState.Ready
+            ? DataLoadStatus.ReadyStatus(new DataSnapshot([], [], [], [], "version"), [])
+            : DataLoadStatus.UnavailableStatus(["invalid data"], null);
         public Task<DataLoadStatus> LoadInitialAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(Status);
 
@@ -86,6 +116,18 @@ public sealed class DataRefreshServiceTests
         {
             ReloadCount++;
             return Task.FromResult(Status);
+        }
+
+    }
+
+    private sealed class FakeCacheInvalidator : ICatalogCacheInvalidator
+    {
+        public int InvalidationCount { get; private set; }
+
+        public Task InvalidateAsync(CancellationToken cancellationToken = default)
+        {
+            InvalidationCount++;
+            return Task.CompletedTask;
         }
     }
 }

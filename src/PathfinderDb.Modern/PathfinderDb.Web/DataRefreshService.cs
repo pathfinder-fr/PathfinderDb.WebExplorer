@@ -7,6 +7,7 @@ namespace PathfinderDb.Web;
 public sealed class DataRefreshService(
     IGitRepository git,
     IDataSnapshotProvider provider,
+    ICatalogCacheInvalidator cache,
     IOptions<PathfinderDataOptions> options,
     ILogger<DataRefreshService> logger) : BackgroundService
 {
@@ -25,7 +26,10 @@ public sealed class DataRefreshService(
         }
 
         logger.LogInformation("Pathfinder data Git pull completed: {Output}", pull.Output);
-        await provider.ReloadAsync(cancellationToken);
+        var previousVersion = provider.Current?.Version;
+        var status = await provider.ReloadAsync(cancellationToken);
+        if (status.State == DataLoadState.Ready && status.Version != previousVersion)
+            await cache.InvalidateAsync(cancellationToken);
         return true;
     }
 

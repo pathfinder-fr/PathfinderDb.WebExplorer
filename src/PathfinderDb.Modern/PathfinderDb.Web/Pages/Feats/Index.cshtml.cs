@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.OutputCaching;
 using PathfinderDb.Data.Domain;
 
 namespace PathfinderDb.Web.Pages.Feats;
 
+[OutputCache(PolicyName = "Catalog")]
 public sealed class IndexModel(CatalogService catalogs) : PageModel
 {
     public CatalogPage<Feat>? CatalogPage { get; private set; }

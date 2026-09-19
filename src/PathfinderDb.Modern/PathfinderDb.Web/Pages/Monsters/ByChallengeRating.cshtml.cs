@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.OutputCaching;
 using PathfinderDb.Data.Domain;
 
 namespace PathfinderDb.Web.Pages.Monsters;
 
+[OutputCache(PolicyName = "Catalog")]
 public sealed class ByChallengeRatingModel(CatalogService catalogs) : PageModel
 {
     public CatalogPage<Monster>? CatalogPage { get; private set; }
