@@ -1,6 +1,8 @@
 # Spécification de modernisation du site Pathfinder FR DB
 
-> **Révision 2** — relecture technique après exploration approfondie du site actuel et du dépôt `pf1-data`. Les sections modifiées ou ajoutées par rapport à la V1 sont signalées par `[MAJ]`. Cette révision ajoute le détail technique nécessaire pour qu'un agent d'implémentation puisse démarrer sans avoir à re-explorer le dépôt de données.
+> **Révision 2** — relecture technique après exploration approfondie du site actuel et du dépôt `pf1-data`.
+> Les sections modifiées ou ajoutées par rapport à la V1 sont signalées par `[MAJ]`.
+> Cette révision ajoute le détail technique nécessaire pour qu'un agent d'implémentation puisse démarrer sans avoir à re-explorer le dépôt de données.
 
 ## Demande initiale (texte source, verbatim)
 
@@ -20,9 +22,11 @@ Chacun de ces points est repris et détaillé plus bas ; le tableau de correspon
 
 ## Contexte et domaine
 
-Le projet actuel est un site de référence historique pour la base de données Pathfinder 1e, répondant à l’URL https://db.pathfinder-fr.org/. Il a été construit comme un petit moteur de navigation sur des données extraites de la communauté Pathfinder-fr.org, avec des listes de dons et de sorts publiées sous forme HTML générée côté serveur.
+Le projet actuel est un site de référence historique pour la base de données Pathfinder 1e, répondant à l’URL https://db.pathfinder-fr.org/.
+Il a été construit comme un petit moteur de navigation sur des données extraites de la communauté Pathfinder-fr.org, avec des listes de dons et de sorts publiées sous forme HTML générée côté serveur.
 
-Le site est fonctionnel, mais il a été conçu pour un contexte de données statiques et un front web legacy. L’analyse du site et du dépôt montre des points de friction majeurs :
+Le site est fonctionnel, mais il a été conçu pour un contexte de données statiques et un front web legacy.
+L’analyse du site et du dépôt montre des points de friction majeurs :
 
 - le site charge et affiche la totalité des dons et des sorts dans les pages d’index, ce qui produit un volume réseau excessif et un rendu lourd ;
 - la navigation est très ouverte et combinatoire ;
@@ -30,7 +34,8 @@ Le site est fonctionnel, mais il a été conçu pour un contexte de données sta
 - les pages ne sont pas construites pour la mise en cache CDN ni pour la résistance aux crawlers IA/bots ;
 - le domaine est incomplet avec le besoin d’ajouter explicitement les monstres et de mieux couvrir les cas nouveaux sur dons et sorts.
 
-Le nouveau projet doit moderniser l’application, la migrer vers .NET 10, et s’appuyer sur le dépôt source de données `D:\code\perso\pf\pf1-data` (clon Git du repo GitHub `pathfinder-fr/pf1-data`). Ce clone doit être la source de vérité du contenu produit et mis à jour régulièrement, et il sera également la source utilisée en production.
+Le nouveau projet doit moderniser l’application, la migrer vers .NET 10, et s’appuyer sur le dépôt source de données `D:\code\perso\pf\pf1-data` (clone Git du repo GitHub `pathfinder-fr/pf1-data`).
+Ce clone doit être la source de vérité du contenu produit et mis à jour régulièrement, et il sera également la source utilisée en production.
 
 Le domaine métier couvre :
 
@@ -90,10 +95,20 @@ Cette section documente précisément ce qui a été trouvé dans `D:\code\perso
 
 ### Nature du dépôt
 
-- `pf1-data` n'est pas un dépôt édité à la main : c'est un **corpus généré** par extraction du wiki Pathfinder-fr.org (fichiers XML MediaWiki bruts référencés dans `diagnostics.json`, ex. `D:\code\perso\pf\pf1-xml\Pathfinder-RPG\*.xml`), transformé par un pipeline d'extraction externe au présent projet.
-- Le dépôt local n'a qu'un seul commit observé (« Initialiser le corpus XML Pathfinder »), ce qui suggère une régénération complète périodique (pas de commits incrémentaux fins). **L'implémentation ne doit donc pas supposer un historique Git riche ni un diff incrémental fiable** : il faut traiter chaque nouvelle version comme un remplacement complet des fichiers de données, et recalculer les index/caches en conséquence.
-- Le dépôt fournit à la fois des exports `*.xml` (format `PathfinderDb.Schema`, compatible avec l'ancien site) et des exports `*.json` plus récents et plus riches (`feats.json`, `spells.json`, `monsters.json`). **Le nouveau projet doit consommer les fichiers `.json`**, qui sont la forme la plus structurée et la plus proche du modèle cible ; les `.xml` sont un format hérité à ne pas utiliser pour la nouvelle app (garder la compatibilité XML n'est pas un objectif).
-- `diagnostics.json` / `diagnostics.md` / `diagnostics.csv` contiennent un **rapport qualité de l'extraction** (`CandidateCount`, `AnalyzedCount`, `ProducedCount`, `DiagnosticCount`, avec des entrées `Severity: info/warning/error` et des règles nommées comme `spell.candidate-not-spell`). Ce rapport doit être exploité par le pipeline d'import : au minimum, bloquer la publication si `ErrorCount > 0` sur une catégorie critique, et logguer/exposer les `WarningCount` pour suivi qualité dans le temps.
+- `pf1-data` n'est pas un dépôt édité à la main : c'est un **corpus généré** par extraction du wiki Pathfinder-fr.org
+  (fichiers XML MediaWiki bruts référencés dans `diagnostics.json`, ex. `D:\code\perso\pf\pf1-xml\Pathfinder-RPG\*.xml`),
+  transformé par un pipeline d'extraction externe au présent projet.
+- Le dépôt local n'a qu'un seul commit observé (« Initialiser le corpus XML Pathfinder »), ce qui suggère une régénération complète périodique (pas de commits incrémentaux fins).
+  **L'implémentation ne doit donc pas supposer un historique Git riche ni un diff incrémental fiable** : il faut traiter chaque nouvelle version comme un remplacement complet des fichiers de données, et recalculer les index/caches en conséquence.
+- Le dépôt fournit à la fois des exports `*.xml` (format `PathfinderDb.Schema`, normalisé via un schéma XSD, compatible avec l'ancien site) et des exports `*.json` plus récents et plus riches (`feats.json`, `spells.json`, `monsters.json`).
+  `[MAJ]` **Le statut du format XML est en cours de clarification avec le mainteneur du projet d'export `pf1-data`** : soit il continue à être généré en parallèle du JSON, soit il est supprimé. Préférence exprimée par le porteur de produit : **conserver et utiliser le XML tant qu'il continue d'être généré, car il est normalisé via un schéma (XSD)** — un schéma JSON équivalent n'existe pas encore pour les exports `.json` (envisagé côté `pf1-data`, non garanti aujourd'hui). En conséquence :
+  - le pipeline d'import doit supporter les deux formats derrière une même interface d'import (ex. `IDataSetSource`), avec sélection explicite du format en configuration ;
+  - tant que le XML reste disponible et schématisé, il doit être la source préférée par défaut pour la validation stricte à l'import (un document invalide au schéma XSD est rejeté avant d'atteindre le mapping métier) ;
+  - le JSON reste utilisable en repli, ou devient la source principale si le XML est supprimé côté `pf1-data`, ou si un schéma JSON équivalent est fourni (voir question ouverte correspondante) ;
+  - dans tous les cas, le modèle interne (`Feat`, `Spell`, `Monster`, …) doit rester indépendant du format d'entrée : le mapping XML→modèle et JSON→modèle doivent produire exactement le même modèle métier.
+- `diagnostics.json` / `diagnostics.md` / `diagnostics.csv` contiennent un **rapport qualité de l'extraction** (`CandidateCount`, `AnalyzedCount`, `ProducedCount`, `DiagnosticCount`,
+  avec des entrées `Severity: info/warning/error` et des règles nommées comme `spell.candidate-not-spell`).
+  Ce rapport doit être exploité par le pipeline d'import : au minimum, bloquer la publication si `ErrorCount > 0` sur une catégorie critique, et logguer/exposer les `WarningCount` pour suivi qualité dans le temps.
 
 ### Tailles réelles (ordre de grandeur pour le dimensionnement du cache et du démarrage)
 
@@ -110,7 +125,8 @@ Ces volumes (au total < 10 Mo) tiennent largement en mémoire ; le chargement in
 
 Champs observés : `Id` (slug), `Name`, `Types` (tableau, ex. `Combat`), `Prerequisites` (tableau hétérogène, voir ci-dessous), `Description`, `Benefit`, `Normal`, `Source` (objet avec `Id` + `References[]`), potentiellement `Localization`.
 
-Les prérequis (`Prerequisites[].Type` / `OtherType`) prennent au moins les valeurs suivantes constatées : `BBA`, `Attribute`, `SkillRank`, `ClassLevel`, `Feat`, `SpellCast`, et un type libre `OtherType` (ex. `ExoticWeaponProficiency`) avec un champ `Value` et une `Description` textuelle de repli. Il existe aussi des groupes de choix (prérequis alternatifs, cf. `FeatPrerequisiteChoice` dans l'ancien code `FeatController.cs`) — **ce mécanisme de choix doit être conservé dans le nouveau modèle**, car il porte une sémantique métier (« l'un OU l'autre des prérequis suffit »).
+Les prérequis (`Prerequisites[].Type` / `OtherType`) prennent au moins les valeurs suivantes constatées : `BBA`, `Attribute`, `SkillRank`, `ClassLevel`, `Feat`, `SpellCast`, et un type libre `OtherType` (ex. `ExoticWeaponProficiency`) avec un champ `Value` et une `Description` textuelle de repli.
+Il existe aussi des groupes de choix (prérequis alternatifs, cf. `FeatPrerequisiteChoice` dans l'ancien code `FeatController.cs`) — **ce mécanisme de choix doit être conservé dans le nouveau modèle**, car il porte une sémantique métier (« l'un OU l'autre des prérequis suffit »).
 
 ### Schéma observé — `Spell` (`spells.json`)
 
@@ -134,14 +150,17 @@ Contrairement à `Feat` et `Spell`, les entrées `Monster` observées ne contien
 }
 ```
 
-Il n'y a **pas de bloc de statistiques complet** (PV, CA, attaques, capacités spéciales, texte descriptif) dans l'export actuel. Cela a un impact direct sur la portée réalisable de la fonctionnalité « Gérer les monstres » :
+Il n'y a **pas de bloc de statistiques complet** (PV, CA, attaques, capacités spéciales, texte descriptif) dans l'export actuel.
+Cela a un impact direct sur la portée réalisable de la fonctionnalité « Gérer les monstres » :
 
 - **Ce qui est faisable dès maintenant avec les données existantes** : liste/index des monstres, filtres par CR / type / environnement / climat / source, lien vers la source (livre) — c'est-à-dire un catalogue de références, pas des fiches de statblock complètes.
-- **Ce qui nécessite une évolution du dépôt `pf1-data` en amont** : toute fiche de détail avec statistiques de jeu complètes. Ce point doit être vérifié avec le mainteneur de `pf1-data` avant de promettre des fiches de monstre détaillées ; voir la question ouverte correspondante en fin de document.
+- **Ce qui nécessite une évolution du dépôt `pf1-data` en amont** : toute fiche de détail avec statistiques de jeu complètes.
+  Ce point doit être vérifié avec le mainteneur de `pf1-data` avant de promettre des fiches de monstre détaillées ; voir la question ouverte correspondante en fin de document.
 
 ### Sources (`Sources[]`)
 
-Liste commune aux trois fichiers : `uc`, `pfrpg`, `um`, `apg`, `paizoBlog`, `bestiary`, `bestiary2`, `bestiary3`, `bestiary4`, `bestiary5`, `codexmonstrueux`, `bookofthedamned`. Cette liste est plus riche que l'ancien site (qui ne chargeait que `apg`, `pfrpg`, `uc`, `um` dans `MemoryDataSet.DataSetNames` et laissait de côté les bestiaires) : **la nouvelle app doit traiter la liste des sources comme dynamique**, dérivée du fichier `Sources[]` à chaque chargement, jamais codée en dur.
+Liste commune aux trois fichiers : `uc`, `pfrpg`, `um`, `apg`, `paizoBlog`, `bestiary`, `bestiary2`, `bestiary3`, `bestiary4`, `bestiary5`, `codexmonstrueux`, `bookofthedamned`.
+Cette liste est plus riche que l'ancien site (qui ne chargeait que `apg`, `pfrpg`, `uc`, `um` dans `MemoryDataSet.DataSetNames` et laissait de côté les bestiaires) : **la nouvelle app doit traiter la liste des sources comme dynamique**, dérivée du fichier `Sources[]` à chaque chargement, jamais codée en dur.
 
 ## Cible technique
 
@@ -161,14 +180,18 @@ Le dépôt `pf1-data` est le référentiel de production des données, sous form
 
 Points à trancher techniquement (cf. questions ouvertes) :
 
-- **Mode de synchronisation en production** : clone Git mis à jour par un job planifié (ex. `git pull` + redémarrage/rechargement à chaud), vs. déploiement qui embarque une version figée de `pf1-data` à chaque build. Le besoin exprimé (« actualisées fréquemment ») pousse vers un rafraîchissement **sans redéploiement complet de l'app** : un service de fond qui vérifie périodiquement (ex. toutes les X minutes/heures) si le HEAD du dépôt a changé, recharge les fichiers JSON en mémoire, et purge les caches de sortie taggés en conséquence.
-- Le chargement doit rester **atomique** du point de vue des lecteurs : construire le nouveau jeu de données en mémoire, puis substituer la référence (pattern « double buffering » / `Interlocked.Exchange` sur une référence immuable), jamais de mutation en place pendant qu'une requête est en cours.
-- Le format `.json` n'ayant pas de garantie de compatibilité de schéma dans le temps (pas de fichier de schéma JSON versionné identifié dans le dépôt), l'import doit être tolérant aux champs additionnels (désérialisation permissive) et strict sur les champs requis, avec échec explicite et log clair si un champ obligatoire disparaît.
+- **Mode de synchronisation en production** : clone Git mis à jour par un job planifié (ex. `git pull` + redémarrage/rechargement à chaud), vs. déploiement qui embarque une version figée de `pf1-data` à chaque build.
+  Le besoin exprimé (« actualisées fréquemment ») pousse vers un rafraîchissement **sans redéploiement complet de l'app** : un service de fond qui vérifie périodiquement (ex. toutes les X minutes/heures) si le HEAD du dépôt a changé,
+  recharge les fichiers JSON en mémoire, et purge les caches de sortie taggés en conséquence.
+- Le chargement doit rester **atomique** du point de vue des lecteurs : construire le nouveau jeu de données en mémoire, puis substituer la référence (pattern « double buffering » / `Interlocked.Exchange` sur une référence immuable),
+  jamais de mutation en place pendant qu'une requête est en cours.
+- Le format `.json` n'ayant pas de garantie de compatibilité de schéma dans le temps (pas de fichier de schéma JSON versionné identifié dans le dépôt), l'import doit être tolérant aux champs additionnels (désérialisation permissive)
+  et strict sur les champs requis, avec échec explicite et log clair si un champ obligatoire disparaît.
 
 ### Architecture proposée
 
 - `Data source` : clone Git de `pf1-data`, rafraîchi périodiquement en production (voir ci-dessus), monté en local via `D:\code\perso\pf\pf1-data` pour le développement.
-- `Import / normalization` : bibliothèque dédiée (projet `PathfinderDb.Data` ou équivalent) qui désérialise les JSON, valide via `diagnostics.json`, et construit des modèles internes typés + index par slug/lettre/section/CR/etc.
+- `Import / normalization` : bibliothèque dédiée (projet `PathfinderDb.Data` ou équivalent) qui désérialise XML et/ou JSON selon le format disponible (via l'abstraction `IDataSetSource`, cf. « Nature du dépôt »), valide (schéma XSD si XML, `diagnostics.json` dans tous les cas), et construit des modèles internes typés + index par slug/lettre/section/CR/etc., identiques quelle que soit la source d'origine.
 - `Content model` : entités `Feat`, `Spell`, `Monster`, `Source`, `Reference`, `Prerequisite` (avec support des groupes de choix), `SpellLevel`, indépendantes de la forme JSON source.
 - `Runtime app` : site web ASP.NET Core 10 (Razor Pages) qui expose des routes déterministes en lecture seule sur ces modèles.
 - `Cache layer` : Output Cache serveur (tags par entité) + en-têtes HTTP orientés CDN pour les pages stables ; pas de cache applicatif ad hoc supplémentaire nécessaire vu le faible volume de données.
@@ -418,11 +441,16 @@ Validation :
 - le chargement initial reste rapide,
 - les ressources statiques sont minimales et bien cacheables.
 
-### Étape 6 — Monstres et contenu avancé `[MAJ]`
+### Étape 6 — Monstres et contenu avancé `[MAJ]` livraison incrémentale actée
 
-Livrable testable : le domaine `Monster` est pleinement intégré à la base de données et à la navigation, **dans la limite des données disponibles aujourd'hui dans `pf1-data`** (métadonnées d'index uniquement, pas de statblock complet — voir analyse ci-dessus).
+Livrable testable : le domaine `Monster` est intégré à la base de données et à la navigation via une **v1 volontairement légère** (catalogue de références, cf. question ouverte n°1 — tranchée), puis étendu par incréments successifs sans attendre une refonte complète de la donnée source.
 
-À livrer :
+**Découpage en incréments explicites** (chacun est un livrable testable indépendant, à planifier séparément dans le plan d'implémentation) :
+
+- **Incrément 6.1 (v1 légère)** : catalogue basé strictement sur les champs déjà présents dans `monsters.json` — nom, CR, type, environnement, climat, source. Aucune donnée inventée ou approximée.
+- **Incrément 6.2+ (à planifier quand la donnée source évolue)** : ajout progressif de tout champ supplémentaire que `pf1-data` viendrait à exposer (statblock, capacités spéciales, description). Chaque nouveau champ disponible peut être ajouté indépendamment, sans attendre que l'ensemble du statblock soit disponible.
+
+À livrer (incrément 6.1) :
 
 - page d’index monstres (alphabétique et/ou par CR),
 - pages de détail avec les champs disponibles (nom, CR, type, environnement, climat, source, lien vers la référence externe le cas échéant),
@@ -457,13 +485,14 @@ Validation :
 
 Ces points ne sont pas bloquants pour démarrer l'étape 1, mais doivent être arbitrés avant les étapes concernées :
 
-1. **Portée réelle des monstres** — `monsters.json` ne contient pas de statblock complet aujourd'hui. Faut-il (a) livrer un catalogue de références (portée réaliste immédiate), (b) attendre une évolution de `pf1-data` qui ajoute les statblocks, ou (c) enrichir manuellement/via un autre pipeline en parallèle ? Impact direct sur l'étape 6.
+1. ~~**Portée réelle des monstres**~~ — **Tranché** : v1 volontairement légère (catalogue de références avec les métadonnées disponibles : nom, CR, type, environnement, climat, source), sans statblock complet. Les fonctionnalités monstre seront ensuite étendues par incréments successifs (ex. statblock complet, capacités spéciales) au fur et à mesure que `pf1-data` enrichira son export, plutôt que de bloquer l'étape 6 en attendant une donnée plus riche. Chaque incrément fera l'objet de son propre livrable testable, sans re-brainstorming complet de la spec.
 2. **Mécanisme de synchronisation prod du clone `pf1-data`** — `git pull` planifié avec rechargement à chaud, vs. artefact figé par déploiement. Le choix impacte l'architecture du `Refresh pipeline` (étape 1/2) et la fraîcheur réelle des données.
 3. **Hébergement et CDN cible** — la stratégie de cache (`Cache-Control`, `stale-while-revalidate`) suppose un CDN en frontal (Cloudflare, Azure Front Door, etc.). Le choix concret n'est pas fixé ; à confirmer pour dimensionner les en-têtes et les règles de purge.
 4. **Segmentation exacte des index** (alphabet vs pagination numérique vs les deux) — proposé par défaut : alphabet pour dons/sorts, CR pour monstres, mais à valider avec le porteur de produit sur la base du volume réel par tranche (ex. la lettre la plus fréquente ne doit pas produire une page trop lourde même après segmentation).
 5. **Design visuel** — la spec demande « sobre, simple, rapide », mais ne fixe pas de charte graphique. Un moodboard ou une référence de style minimal (ex. type documentation technique) serait utile avant l'étape 5, potentiellement via le companion visuel de brainstorming.
 6. **Fonctionnalités supprimées vs. différées** — l'ancien site permettait des recherches combinées (attributs, classes, niveaux multiples pour les dons). Cette spec choisit de **supprimer** ces combinaisons plutôt que de les limiter techniquement. Confirmer qu'aucun usage identifié aujourd'hui ne dépend spécifiquement de ces combinaisons avancées avant suppression définitive.
 7. **AOT / ReadyToRun** — à valider techniquement en étape 2 : compatibilité avec Razor Pages et le hébergeur cible, avant de s'engager sur cette option de démarrage rapide.
+8. `[MAJ]` **Devenir du format XML et d'un futur schéma JSON** — en attente de clarification du mainteneur de `pf1-data` sur la poursuite ou non de la génération du XML (schématisé via XSD) en parallèle du JSON, et sur l'éventuelle production d'un schéma JSON équivalent. Tant que cette clarification n'est pas actée : concevoir l'import derrière une abstraction supportant les deux formats (voir « Nature du dépôt » ci-dessus), avec le XML comme source de validation stricte préférée par défaut s'il reste disponible.
 
 ## `[MAJ]` Traçabilité demande → livrables
 
