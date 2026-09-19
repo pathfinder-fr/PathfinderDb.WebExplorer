@@ -10,10 +10,15 @@ public sealed class IndexModel(CatalogService catalogs) : PageModel
 {
     public CatalogPage<Feat>? CatalogPage { get; private set; }
     public IReadOnlyList<string> Buckets { get; private set; } = [];
+    public IReadOnlyList<string> Types => catalogs.FeatTypeBuckets;
+    public IReadOnlyList<string> Sources => catalogs.FeatSourceBuckets;
 
     public IActionResult OnGet(string? initial, [FromQuery] int page = 1)
     {
         Buckets = catalogs.FeatBuckets;
+        if (string.IsNullOrWhiteSpace(initial))
+            return Page();
+
         CatalogPage = catalogs.GetFeats(initial, page);
         if (CatalogPage is not null && catalogs.SnapshotVersion is { } version)
             if (CatalogCacheHeaders.Apply(Response, version, Request.Path + Request.QueryString))

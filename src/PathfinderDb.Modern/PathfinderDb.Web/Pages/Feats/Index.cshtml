@@ -6,23 +6,41 @@
 <section class="page-card">
     <p class="eyebrow">Catalogue</p>
     <h1>Dons</h1>
-    <p class="intro">Retrouvez les dons par ordre alphabétique.</p>
+    <p class="intro">Choisissez un critère pour trouver rapidement le don recherché.</p>
+    <h2>Par type</h2>
+    <ul class="bucket-nav" aria-label="Types de dons">
+        @foreach (var type in Model.Types)
+        {
+            <li><a href="/dons/type/@type">@type</a></li>
+        }
+    </ul>
+    <h2>Par source</h2>
+    <ul class="bucket-nav" aria-label="Sources des dons">
+        @foreach (var source in Model.Sources)
+        {
+            <li><a href="/dons/source/@source">@source</a></li>
+        }
+    </ul>
+    <h2>Par ordre alphabétique</h2>
     <nav class="bucket-nav" aria-label="Initiales">
         @foreach (var bucket in Model.Buckets)
         {
             <a href="/dons/@bucket">@bucket</a>
         }
     </nav>
-    <h2>Lettre @Model.CatalogPage!.Bucket</h2>
-    <ol class="catalog-list">
-        @foreach (var feat in Model.CatalogPage.Items)
-        {
-            <li><a href="/dons/detail/@feat.Id">@feat.Name</a></li>
-        }
-    </ol>
-    <nav class="pagination" aria-label="Pagination">
-        @if (Model.CatalogPage.HasPreviousPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
-        <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
-        @if (Model.CatalogPage.HasNextPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
-    </nav>
+    @if (Model.CatalogPage is not null)
+    {
+        <h2>Lettre @Model.CatalogPage.Bucket</h2>
+        <ol class="catalog-list">
+            @foreach (var feat in Model.CatalogPage.Items)
+            {
+                <li><a href="/dons/detail/@feat.Id">@feat.Name</a></li>
+            }
+        </ol>
+        <nav class="pagination" aria-label="Pagination">
+            @if (Model.CatalogPage.HasPreviousPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+            <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+            @if (Model.CatalogPage.HasNextPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+        </nav>
+    }
 </section>

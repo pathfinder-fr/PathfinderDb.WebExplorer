@@ -6,17 +6,33 @@
 <section class="page-card">
     <p class="eyebrow">Catalogue</p>
     <h1>Sorts</h1>
-    <p class="intro">Consultez les sorts et leurs niveaux par ordre alphabétique.</p>
+    <p class="intro">Choisissez une école, une classe, une source ou une initiale.</p>
+    <h2>Par école</h2>
+    <ul class="bucket-nav" aria-label="Écoles de magie">
+        @foreach (var school in Model.Schools) { <li><a href="/sorts/ecole/@school">@school</a></li> }
+    </ul>
+    <h2>Par classe</h2>
+    <ul class="bucket-nav" aria-label="Classes">
+        @foreach (var spellClass in Model.Classes) { <li><a href="/sorts/classe/@(spellClass)">@spellClass</a></li> }
+    </ul>
+    <h2>Par source</h2>
+    <ul class="bucket-nav" aria-label="Sources des sorts">
+        @foreach (var source in Model.Sources) { <li><a href="/sorts/source/@source">@source</a></li> }
+    </ul>
+    <h2>Par ordre alphabétique</h2>
     <nav class="bucket-nav" aria-label="Initiales">
         @foreach (var bucket in Model.Buckets) { <a href="/sorts/@bucket">@bucket</a> }
     </nav>
-    <h2>Lettre @Model.CatalogPage!.Bucket</h2>
-    <ol class="catalog-list">
-        @foreach (var spell in Model.CatalogPage.Items) { <li><a href="/sorts/detail/@spell.Id">@spell.Name</a></li> }
-    </ol>
-    <nav class="pagination" aria-label="Pagination">
-        @if (Model.CatalogPage.HasPreviousPage) { <a href="/sorts/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
-        <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
-        @if (Model.CatalogPage.HasNextPage) { <a href="/sorts/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
-    </nav>
+    @if (Model.CatalogPage is not null)
+    {
+        <h2>Lettre @Model.CatalogPage.Bucket</h2>
+        <ol class="catalog-list">
+            @foreach (var spell in Model.CatalogPage.Items) { <li><a href="/sorts/detail/@spell.Id">@spell.Name</a></li> }
+        </ol>
+        <nav class="pagination" aria-label="Pagination">
+            @if (Model.CatalogPage.HasPreviousPage) { <a href="/sorts/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+            <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+            @if (Model.CatalogPage.HasNextPage) { <a href="/sorts/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+        </nav>
+    }
 </section>
