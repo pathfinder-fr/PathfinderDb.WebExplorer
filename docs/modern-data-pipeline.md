@@ -89,15 +89,20 @@ and sources are discovered from the loaded JSON rather than maintained as a
 hard-coded enumeration; this keeps values such as `psychiste` available when
 present in the data.
 
-Monster navigation is available by challenge rating, type, and source:
+Monster navigation is available alphabetically, by challenge rating, type, and
+source. Alphabetical pages use the same deterministic bucket and pagination
+rules as feats and spells:
 
+* `/monstres/{initial}`
 * `/monstres/cr/{challengeRating}`
 * `/monstres/type/{type}`
 * `/monstres/source/{source}`
+* `/monstres/detail/{slug}`
 
-Type and source indexes are built in the immutable data snapshot, so these
-routes keep the same bounded 50-item pagination and 404 behavior as the
-existing catalog routes.
+Initial, type, and source indexes are built in the immutable data snapshot, so
+these routes keep the same bounded 50-item pagination and 404 behavior as the
+existing catalog routes. Monster details use the explicit `/detail/` segment
+to avoid ambiguity with the optional alphabetical route.
 
 Feat and spell detail pages now render the normalized fields available in the
 JSON exports, including prerequisite choices, normal text, source, spell

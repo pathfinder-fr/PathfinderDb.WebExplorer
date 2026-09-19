@@ -14,6 +14,9 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
     public CatalogPage<Spell>? GetSpells(string? initial, int page = 1) =>
         GetPage(provider.Current?.SpellsByInitial, NormalizeInitial(initial), page);
 
+    public CatalogPage<Monster>? GetMonstersByInitial(string? initial, int page = 1) =>
+        GetPage(provider.Current?.MonstersByInitial, NormalizeInitial(initial), page);
+
     public CatalogPage<Monster>? GetMonsters(string? challengeRating, int page = 1)
     {
         if (!decimal.TryParse(challengeRating, NumberStyles.Number, CultureInfo.InvariantCulture, out var cr))
@@ -52,6 +55,9 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
 
     public IReadOnlyList<string> SpellBuckets =>
         provider.Current?.SpellsByInitial.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> MonsterInitialBuckets =>
+        provider.Current?.MonstersByInitial.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
 
     public IReadOnlyList<decimal> MonsterBuckets =>
         provider.Current?.MonstersByChallengeRating.Keys.OrderBy(x => x).ToArray() ?? [];

@@ -60,6 +60,27 @@ public sealed class CatalogServiceTests
     }
 
     [Fact]
+    public void Monster_catalog_supports_alphabetical_buckets()
+    {
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [],
+            [],
+            [
+                new Monster("wolf", "Wolf", 1, null, null, "Animal", null),
+                new Monster("ape", "Ape", 1, null, null, "Animal", null)
+            ],
+            [],
+            "version")));
+
+        var page = service.GetMonstersByInitial("A");
+
+        Assert.NotNull(page);
+        Assert.Equal("A", page!.Bucket);
+        Assert.Equal(["Ape"], page.Items.Select(monster => monster.Name));
+        Assert.Equal(["A", "W"], service.MonsterInitialBuckets);
+    }
+
+    [Fact]
     public void Monster_challenge_rating_bucket_uses_invariant_route_format()
     {
         var service = new CatalogService(new TestProvider(new DataSnapshot(

@@ -10,6 +10,7 @@ public sealed class CatalogRouteTests
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySchool.cshtml", "@page \"/sorts/ecole/{school}\"")]
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/ByClass.cshtml", "@page \"/sorts/classe/{class}\"")]
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySource.cshtml", "@page \"/sorts/source/{source}\"")]
+    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Monsters/Detail.cshtml", "@page \"/monstres/detail/{slug}\"")]
     public void Dimension_pages_declare_canonical_routes(string relativePath, string route)
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
@@ -31,6 +32,16 @@ public sealed class CatalogRouteTests
         Assert.Contains("Par école", spells);
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", feats);
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", spells);
+    }
+
+    [Fact]
+    public void Monster_landing_page_exposes_alphabetical_navigation()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var monsters = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
+
+        Assert.Contains("Par ordre alphabétique", monsters);
+        Assert.Contains("/monstres/@bucket", monsters);
     }
 
     [Fact]

@@ -24,6 +24,7 @@ public sealed class DataSnapshot
             .Order(StringComparer.OrdinalIgnoreCase).ToArray();
         FeatsByInitial = BuildInitialIndex(Feats);
         SpellsByInitial = BuildInitialIndex(Spells);
+        MonstersByInitial = BuildInitialIndex(Monsters);
         MonstersByChallengeRating = BuildChallengeRatingIndex(Monsters);
         MonstersByType = BuildStringIndex(Monsters, monster => [monster.Type]);
         MonstersBySource = BuildStringIndex(Monsters, monster => [monster.Source?.Id]);
@@ -46,6 +47,7 @@ public sealed class DataSnapshot
     public IReadOnlyDictionary<string, Source> SourcesById { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsByInitial { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsByInitial { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersByInitial { get; }
     public IReadOnlyDictionary<decimal, IReadOnlyList<Monster>> MonstersByChallengeRating { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersByType { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersBySource { get; }
@@ -67,6 +69,7 @@ public sealed class DataSnapshot
                 {
                     Feat feat => feat.Name,
                     Spell spell => spell.Name,
+                    Monster monster => monster.Name,
                     _ => throw new ArgumentException($"Unsupported index type: {typeof(T).Name}.")
                 }),
                 StringComparer.OrdinalIgnoreCase)

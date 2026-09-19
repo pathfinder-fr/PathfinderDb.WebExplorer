@@ -1,4 +1,4 @@
-@page "/monstres"
+@page "/monstres/{initial?}"
 @model PathfinderDb.Web.Pages.Monsters.IndexModel
 @{
     ViewData["Title"] = "Monstres";
@@ -28,4 +28,26 @@
             <a href="/monstres/source/@source">@CatalogText.FormatSource(source)</a>
         }
     </nav>
+    <h2>Par ordre alphabétique</h2>
+    <nav class="catalog-list" aria-label="Initiales">
+        @foreach (var bucket in Model.InitialBuckets)
+        {
+            <a href="/monstres/@bucket">@bucket</a>
+        }
+    </nav>
+    @if (Model.CatalogPage is not null)
+    {
+        <h2>Lettre @Model.CatalogPage.Bucket</h2>
+        <ol class="catalog-list">
+            @foreach (var monster in Model.CatalogPage.Items)
+            {
+                <li><a href="/monstres/detail/@monster.Id">@monster.Name</a></li>
+            }
+        </ol>
+        <nav class="pagination" aria-label="Pagination">
+            @if (Model.CatalogPage.HasPreviousPage) { <a href="/monstres/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+            <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+            @if (Model.CatalogPage.HasNextPage) { <a href="/monstres/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+        </nav>
+    }
 </section>
