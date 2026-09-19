@@ -10,4 +10,7 @@ public sealed record Spell(
     string? Target,
     string? CastingTime,
     Source? Source,
-    IReadOnlyDictionary<string, string> Localization);
+    IReadOnlyDictionary<string, string> Localization)
+{
+    public IReadOnlyList<Reference> References { get; init; } = [];
+}

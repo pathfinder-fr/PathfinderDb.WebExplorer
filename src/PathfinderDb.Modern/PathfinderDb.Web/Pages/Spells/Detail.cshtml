@@ -14,6 +14,20 @@
     @if (!string.IsNullOrWhiteSpace(Model.Spell.Target)) { <p><strong>Cible :</strong> @Model.Spell.Target</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Spell.CastingTime)) { <p><strong>Temps d'incantation :</strong> @Model.Spell.CastingTime</p> }
     @if (Model.Spell.Source is not null) { <p class="intro">Source : @CatalogText.FormatSource(Model.Spell.Source.Id)</p> }
+    @if (Model.Spell.References.Count > 0)
+    {
+        <h2>Sources originales</h2>
+        <p class="reference-links">
+            @foreach (var reference in Model.Spell.References)
+            {
+                var referenceUrl = reference.HrefString ?? reference.Href;
+                if (!string.IsNullOrWhiteSpace(referenceUrl))
+                {
+                    <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">@(reference.Name ?? "Source")</a>
+                }
+            }
+        </p>
+    }
     @if (Model.Spell.Localization.Count > 0)
     {
         <h2>Traductions</h2>

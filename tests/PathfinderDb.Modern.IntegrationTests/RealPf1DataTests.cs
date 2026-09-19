@@ -37,6 +37,9 @@ public sealed class RealPf1DataTests
         Assert.NotEmpty(result.Snapshot.SpellsBySource);
         Assert.NotEmpty(result.Snapshot.FeatsByType);
         Assert.NotEmpty(result.Snapshot.FeatsBySource);
+        Assert.Contains(result.Snapshot.Feats, feat => feat.References.Count > 0);
+        Assert.Contains(result.Snapshot.Spells, spell => spell.References.Count > 0);
+        Assert.All(result.Snapshot.Monsters, monster => Assert.Empty(monster.References));
 
         var catalogs = new CatalogService(new SnapshotProvider(result.Snapshot));
         var school = result.Snapshot.SpellsBySchool.Keys.First();

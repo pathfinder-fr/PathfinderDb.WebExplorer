@@ -22,4 +22,18 @@
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Benefit)) { <h2>Avantage</h2><p>@Model.Feat.Benefit</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Normal)) { <h2>Normal</h2><p>@Model.Feat.Normal</p> }
     @if (Model.Feat.Source is not null) { <p class="intro">Source : @CatalogText.FormatSource(Model.Feat.Source.Id)</p> }
+    @if (Model.Feat.References.Count > 0)
+    {
+        <h2>Sources originales</h2>
+        <p class="reference-links">
+            @foreach (var reference in Model.Feat.References)
+            {
+                var referenceUrl = reference.HrefString ?? reference.Href;
+                if (!string.IsNullOrWhiteSpace(referenceUrl))
+                {
+                    <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">@(reference.Name ?? "Source")</a>
+                }
+            }
+        </p>
+    }
 </article>

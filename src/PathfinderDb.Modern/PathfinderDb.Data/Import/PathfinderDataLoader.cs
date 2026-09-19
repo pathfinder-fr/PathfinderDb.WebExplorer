@@ -113,7 +113,10 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             var name = Required(x.Name, $"feats[{i}].Name", validation);
             return new Feat(id, name, (x.Types ?? []).Where(y => !string.IsNullOrWhiteSpace(y)).ToArray(),
                 (x.Prerequisites ?? []).Select(MapPrerequisite).ToArray(), x.Description, x.Benefit, x.Normal,
-                MapSource(x.Source, sources, $"feats[{i}].Source", validation));
+                MapSource(x.Source, sources, $"feats[{i}].Source", validation))
+            {
+                References = MapReferences(x.Source?.References)
+            };
         }).ToArray();
 
     private static IReadOnlyList<Spell> MapSpells(IEnumerable<SpellJson>? values, IReadOnlyDictionary<string, Source> sources, DataValidationResult validation) =>
@@ -129,7 +132,10 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             }).ToArray();
             return new Spell(id, name, x.School, levels, SplitKinds(x.Components?.Kinds),
                 x.Range?.SpecificValue ?? JsonValue(x.Range?.Value), JsonValue(x.Target?.Value), JsonValue(x.CastingTime?.Value),
-                MapSource(x.Source, sources, $"spells[{i}].Source", validation), MapLocalization(x.Localization));
+                MapSource(x.Source, sources, $"spells[{i}].Source", validation), MapLocalization(x.Localization))
+            {
+                References = MapReferences(x.Source?.References)
+            };
         }).ToArray();
 
     private static IReadOnlyList<Monster> MapMonsters(IEnumerable<MonsterJson>? values, IReadOnlyDictionary<string, Source> sources, DataValidationResult validation) =>
@@ -159,6 +165,9 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             (value.Items ?? []).Select(MapPrerequisite).ToArray());
 
     private static Reference MapReference(ReferenceJson value) => new(value.Name, value.Href, value.HrefString, value.Lang);
+
+    private static IReadOnlyList<Reference> MapReferences(IEnumerable<ReferenceJson>? values) =>
+        (values ?? []).Select(MapReference).ToArray();
 
     private static string Required(string? value, string location, DataValidationResult validation)
     {

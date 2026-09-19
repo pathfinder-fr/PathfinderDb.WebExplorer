@@ -48,4 +48,19 @@ public sealed class DomainSnapshotTests
         Assert.Equal(["combat-feat"], snapshot.FeatsByType["Combat"].Select(x => x.Id));
         Assert.Equal(["combat-feat", "general-feat"], snapshot.FeatsBySource["core"].Select(x => x.Id));
     }
+
+    [Fact]
+    public void Catalog_entries_preserve_item_level_origin_references()
+    {
+        var reference = new Reference("Wiki Pathfinder-fr.org", "https://example.test/wiki", null, "fr");
+        var snapshot = new DataSnapshot(
+            [new Feat("feat", "Feat", [], [], null, null, null, null) { References = [reference] }],
+            [new Spell("spell", "Spell", null, [], [], null, null, null, null, new Dictionary<string, string>()) { References = [reference] }],
+            [new Monster("monster", "Monster", null, null, null, null, null)],
+            [],
+            "version");
+
+        Assert.Equal("https://example.test/wiki", snapshot.Feats[0].References[0].Href);
+        Assert.Equal("https://example.test/wiki", snapshot.Spells[0].References[0].Href);
+    }
 }

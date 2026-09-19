@@ -7,4 +7,7 @@ public sealed record Monster(
     string? Climate,
     string? Environment,
     string? Type,
-    Source? Source);
+    Source? Source)
+{
+    public IReadOnlyList<Reference> References { get; init; } = [];
+}

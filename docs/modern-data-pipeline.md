@@ -104,6 +104,12 @@ JSON exports, including prerequisite choices, normal text, source, spell
 components, target, casting time, and localization values. Missing optional
 fields remain omitted rather than rendered as empty placeholders.
 
+Item-level origin references are preserved for feats and spells. Their detail
+pages expose the URLs supplied by the export, such as the Pathfinder-fr.org
+Wiki and DRP Black-Book-Éditions pages, without reconstructing URLs from names.
+The current monster exports contain no item-level origin references, so monster
+pages intentionally do not display invented per-creature links.
+
 Technical category values remain canonical in the snapshot and URLs, but the
 Razor presentation layer translates known values for readers. For example,
 `um` is displayed as `L’art de la magie`, `bard` as `Barde`, `Conjuration` as

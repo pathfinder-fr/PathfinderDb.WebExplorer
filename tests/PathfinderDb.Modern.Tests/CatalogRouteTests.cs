@@ -68,4 +68,17 @@ public sealed class CatalogRouteTests
         Assert.Contains("border-bottom: 2px solid var(--accent-dark)", stylesheet);
         Assert.Contains(".main-nav a {\r\n    color: var(--accent-dark);", stylesheet);
     }
+
+    [Fact]
+    public void Detail_pages_render_original_reference_links_when_available()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var feats = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Feats", "Detail.cshtml"));
+        var spells = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Detail.cshtml"));
+
+        Assert.Contains("Model.Feat.References", feats);
+        Assert.Contains("Model.Spell.References", spells);
+        Assert.Contains("target=\"_blank\"", feats);
+        Assert.Contains("target=\"_blank\"", spells);
+    }
 }

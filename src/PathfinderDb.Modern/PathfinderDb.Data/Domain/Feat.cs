@@ -8,4 +8,7 @@ public sealed record Feat(
     string? Description,
     string? Benefit,
     string? Normal,
-    Source? Source);
+    Source? Source)
+{
+    public IReadOnlyList<Reference> References { get; init; } = [];
+}
