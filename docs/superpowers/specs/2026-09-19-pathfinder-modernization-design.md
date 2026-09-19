@@ -319,7 +319,7 @@ Pas de route générique type :
 
 - `/search?type=x&source=y&class=z&...` explosant les combinaisons
 - pas de query string libre acceptant une combinaison de filtres non prévue à l'avance
-- pas de tri/pagination paramétrable à volonté (taille de page fixe côté serveur, ex. 100 éléments par tranche alphabétique)
+- pas de tri/pagination paramétrable à volonté (taille de page cible fixée à **50 éléments** par tranche, cf. question ouverte n°4 tranchée ; sous-pagination numérique bornée à l'intérieur d'une tranche si celle-ci dépasse ce seuil, jamais de filtre combiné en plus)
 
 ### 2. Préférer le server-rendered / pre-rendered
 
@@ -486,12 +486,16 @@ Validation :
 Ces points ne sont pas bloquants pour démarrer l'étape 1, mais doivent être arbitrés avant les étapes concernées :
 
 1. ~~**Portée réelle des monstres**~~ — **Tranché** : v1 volontairement légère (catalogue de références avec les métadonnées disponibles : nom, CR, type, environnement, climat, source), sans statblock complet. Les fonctionnalités monstre seront ensuite étendues par incréments successifs (ex. statblock complet, capacités spéciales) au fur et à mesure que `pf1-data` enrichira son export, plutôt que de bloquer l'étape 6 en attendant une donnée plus riche. Chaque incrément fera l'objet de son propre livrable testable, sans re-brainstorming complet de la spec.
-2. **Mécanisme de synchronisation prod du clone `pf1-data`** — `git pull` planifié avec rechargement à chaud, vs. artefact figé par déploiement. Le choix impacte l'architecture du `Refresh pipeline` (étape 1/2) et la fraîcheur réelle des données.
-3. **Hébergement et CDN cible** — la stratégie de cache (`Cache-Control`, `stale-while-revalidate`) suppose un CDN en frontal (Cloudflare, Azure Front Door, etc.). Le choix concret n'est pas fixé ; à confirmer pour dimensionner les en-têtes et les règles de purge.
-4. **Segmentation exacte des index** (alphabet vs pagination numérique vs les deux) — proposé par défaut : alphabet pour dons/sorts, CR pour monstres, mais à valider avec le porteur de produit sur la base du volume réel par tranche (ex. la lettre la plus fréquente ne doit pas produire une page trop lourde même après segmentation).
-5. **Design visuel** — la spec demande « sobre, simple, rapide », mais ne fixe pas de charte graphique. Un moodboard ou une référence de style minimal (ex. type documentation technique) serait utile avant l'étape 5, potentiellement via le companion visuel de brainstorming.
-6. **Fonctionnalités supprimées vs. différées** — l'ancien site permettait des recherches combinées (attributs, classes, niveaux multiples pour les dons). Cette spec choisit de **supprimer** ces combinaisons plutôt que de les limiter techniquement. Confirmer qu'aucun usage identifié aujourd'hui ne dépend spécifiquement de ces combinaisons avancées avant suppression définitive.
-7. **AOT / ReadyToRun** — à valider techniquement en étape 2 : compatibilité avec Razor Pages et le hébergeur cible, avant de s'engager sur cette option de démarrage rapide.
+2. ~~**Mécanisme de synchronisation prod du clone `pf1-data`**~~ — **Tranché** : `git pull` planifié + rechargement à chaud (sans redémarrage du process), **fréquence une fois par jour**. Le `Refresh pipeline` (étape 1/2) doit implémenter un `IHostedService` avec un déclenchement périodique (ex. `PeriodicTimer` ou tâche planifiée quotidienne), qui vérifie le nouveau `HEAD` du dépôt, recharge les données en mémoire et purge les caches taggés (voir mécanique de cache). Pas besoin d'un mécanisme de webhook/push en v1 : le pull quotidien suffit au regard de la fréquence de mise à jour réelle de `pf1-data`.
+3. ~~**Hébergement et CDN cible**~~ — **Tranché** : hébergement sur **VM auto-hébergée** (IIS ou reverse proxy devant Kestrel — à préciser en étape 1 selon les contraintes d'infra existantes), avec **Cloudflare** en frontal comme CDN/cache. Impacts concrets à prévoir pour l'implémentation :
+   - configurer les en-têtes `Cache-Control` / `stale-while-revalidate` en sachant que Cloudflare les respecte nativement pour le cache de périphérie (« edge cache ») ;
+   - prévoir une règle de **purge de cache Cloudflare** (API Cloudflare, purge par tag ou par URL) déclenchée par le `Refresh pipeline` après rechargement des données, pour éviter de servir du contenu périmé jusqu'à `max-age` ;
+   - le reverse proxy devant Kestrel (IIS ou nginx selon l'infra) doit transmettre les en-têtes de cache sans les altérer ;
+   - Cloudflare permettant aussi le filtrage de bots, envisager ses règles de bot management / rate limiting en complément du `robots.txt` (moins critique vu que le contenu est de toute façon caché en edge).
+4. ~~**Segmentation exacte des index**~~ — **Tranché** : segmentation par **alphabet pour dons/sorts** et **par CR pour monstres** (proposition par défaut validée), avec une **taille de page cible de 50 éléments**. Si une tranche alphabétique dépasse sensiblement 50 éléments (ex. lettre très fréquente), prévoir une sous-pagination numérique **à l'intérieur** de cette tranche (ex. `/sorts/a?page=2`) plutôt que de renoncer à la segmentation par lettre — mais cette sous-pagination doit rester bornée et prévisible (pas de tri/filtre combiné en plus).
+5. ~~**Design visuel**~~ — **Tranché** : pas de préférence de style imposée par le porteur de produit. **À définir plus tard avec des mockups**, avant l'étape 5, via le companion visuel de brainstorming. À cette occasion, proposer plusieurs références de sites existants sobres/rapides à titre d'inspiration (ex. sites de documentation technique, wikis minimalistes) plutôt que de partir d'une page blanche.
+6. ~~**Fonctionnalités supprimées vs. différées**~~ — **Tranché** : suppression en v1 des recherches combinées de l'ancien site (attributs, classes, niveaux multiples pour les dons), **avec une note conservée pour réévaluation future** plutôt qu'une suppression définitive et irréversible. Cette note est conservée dans la section « À ne pas faire dans la v1 » ci-dessous, marquée comme réévaluable après la v1 plutôt que comme un renoncement permanent.
+7. ~~**AOT / ReadyToRun**~~ — **Tranché** : reste **ouvert et différé à l'étape 2**, à tester techniquement par l'agent d'implémentation selon la compatibilité réelle avec Razor Pages et l'hébergement en VM auto-hébergée (IIS/Kestrel). Aucune préférence imposée d'avance entre ReadyToRun et Full AOT ; le choix doit être documenté avec sa justification (mesure de démarrage à l'appui) au moment de l'étape 2.
 8. `[MAJ]` **Devenir du format XML et d'un futur schéma JSON** — en attente de clarification du mainteneur de `pf1-data` sur la poursuite ou non de la génération du XML (schématisé via XSD) en parallèle du JSON, et sur l'éventuelle production d'un schéma JSON équivalent. Tant que cette clarification n'est pas actée : concevoir l'import derrière une abstraction supportant les deux formats (voir « Nature du dépôt » ci-dessus), avec le XML comme source de validation stricte préférée par défaut s'il reste disponible.
 
 ## `[MAJ]` Traçabilité demande → livrables
@@ -527,7 +531,8 @@ Le projet est réussi si :
 - ne pas exposer des filtres “illimités” sans garde-fou,
 - ne pas recréer une architecture d’édition web pour un contenu qui doit rester stable et source-based,
 - ne pas ajouter de dépendances frontend lourdes,
-- ne pas réintroduire le modèle XML embarqué dans le front.
+- ne pas embarquer de copies de fichiers de données (XML ou JSON) dans le dépôt applicatif : la donnée vient uniquement du clone `pf1-data` externe, jamais d'une copie committée dans ce repo (nuance par rapport à la V1 de cette spec : le format XML en tant que tel n'est pas proscrit, voir question ouverte n°8 — seul l'embarquement de données dans le repo web est interdit).
+- `[MAJ]` filtres combinés avancés sur les dons (attributs, classes, niveaux multiples) : **supprimés en v1, mais réévaluables plus tard** — ne pas les considérer comme abandonnés définitivement (cf. question ouverte n°6, tranchée en ce sens) ; consigner cette suppression comme un choix de portée v1, pas comme un renoncement produit.
 
 ## Proposition de plan de mise en œuvre
 
