@@ -6,36 +6,39 @@
 <section class="page-card">
     <p class="eyebrow">Catalogue</p>
     <h1>Monstres</h1>
-    <p class="intro">Choisissez un facteur de puissance pour parcourir les créatures.</p>
-    <h2>Par facteur de puissance</h2>
-    <nav class="catalog-list" aria-label="Facteurs de puissance">
-        @foreach (var challengeRating in Model.ChallengeRatings)
-        {
-            <a href="/monstres/cr/@CatalogText.FormatChallengeRating(challengeRating)">@CatalogText.FormatChallengeRating(challengeRating)</a>
-        }
-    </nav>
-    <h2>Par type</h2>
-    <nav class="catalog-list" aria-label="Types de monstres">
-        @foreach (var type in Model.Types)
-        {
-            <a href="/monstres/type/@type">@CatalogText.FormatMonsterType(type)</a>
-        }
-    </nav>
-    <h2>Par source</h2>
-    <nav class="catalog-list" aria-label="Sources des monstres">
-        @foreach (var source in Model.Sources)
-        {
-            <a href="/monstres/source/@source">@CatalogText.FormatSource(source)</a>
-        }
-    </nav>
-    <h2>Par ordre alphabétique</h2>
-    <nav class="catalog-list" aria-label="Initiales">
-        @foreach (var bucket in Model.InitialBuckets)
-        {
-            <a href="/monstres/@bucket">@bucket</a>
-        }
-    </nav>
-    @if (Model.CatalogPage is not null)
+    @if (Model.CatalogPage is null)
+    {
+        <p class="intro">Choisissez un facteur de puissance pour parcourir les créatures.</p>
+        <h2>Par facteur de puissance</h2>
+        <nav class="catalog-list" aria-label="Facteurs de puissance">
+            @foreach (var challengeRating in Model.ChallengeRatings)
+            {
+                <a href="/monstres/cr/@CatalogText.FormatChallengeRating(challengeRating)">@CatalogText.FormatChallengeRating(challengeRating)</a>
+            }
+        </nav>
+        <h2>Par type</h2>
+        <nav class="catalog-list" aria-label="Types de monstres">
+            @foreach (var type in Model.Types)
+            {
+                <a href="/monstres/type/@type">@CatalogText.FormatMonsterType(type)</a>
+            }
+        </nav>
+        <h2>Par source</h2>
+        <nav class="catalog-list" aria-label="Sources des monstres">
+            @foreach (var source in Model.Sources)
+            {
+                <a href="/monstres/source/@source">@CatalogText.FormatSource(source)</a>
+            }
+        </nav>
+        <h2>Par ordre alphabétique</h2>
+        <nav class="catalog-list" aria-label="Initiales">
+            @foreach (var bucket in Model.InitialBuckets)
+            {
+                <a href="/monstres/@bucket">@bucket</a>
+            }
+        </nav>
+    }
+    else
     {
         <h2>Lettre @Model.CatalogPage.Bucket</h2>
         <ol class="catalog-list">

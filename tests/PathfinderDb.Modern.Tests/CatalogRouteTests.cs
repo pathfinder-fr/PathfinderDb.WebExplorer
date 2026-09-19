@@ -45,6 +45,24 @@ public sealed class CatalogRouteTests
     }
 
     [Fact]
+    public void Catalog_indexes_hide_selection_menus_when_a_bucket_is_selected()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var pages = new[]
+        {
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Feats", "Index.cshtml"),
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"),
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml")
+        };
+
+        foreach (var page in pages)
+        {
+            var markup = File.ReadAllText(page);
+            Assert.Contains("@if (Model.CatalogPage is null)", markup);
+        }
+    }
+
+    [Fact]
     public void Catalog_lists_share_one_three_column_style()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
