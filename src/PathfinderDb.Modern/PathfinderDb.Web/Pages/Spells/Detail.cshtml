@@ -1,0 +1,15 @@
+@page "/sorts/detail/{slug}"
+@model PathfinderDb.Web.Pages.Spells.DetailModel
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8" /><title>@Model.Spell!.Name - Sort</title></head>
+<body>
+<main>
+    <p><a href="/sorts">Tous les sorts</a></p>
+    <h1>@Model.Spell!.Name</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Spell.School)) { <p>École : @Model.Spell.School</p> }
+    @if (Model.Spell.Levels.Count > 0) { <p>Niveaux : @string.Join(", ", Model.Spell.Levels.Select(x => $"{x.List} {x.Level}"))</p> }
+    @if (!string.IsNullOrWhiteSpace(Model.Spell.Range)) { <p>Portée : @Model.Spell.Range</p> }
+</main>
+</body>
+</html>

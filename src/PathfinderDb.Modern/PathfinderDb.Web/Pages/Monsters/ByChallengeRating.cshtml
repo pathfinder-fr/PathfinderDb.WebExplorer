@@ -1,0 +1,23 @@
+@page "/monstres/cr/{challengeRating}"
+@model PathfinderDb.Web.Pages.Monsters.ByChallengeRatingModel
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8" /><title>Monstres CR @Model.CatalogPage!.Bucket - Pathfinder FR DB</title></head>
+<body>
+<main>
+    <p><a href="/monstres">Tous les monstres</a></p>
+    <h1>Monstres CR @Model.CatalogPage!.Bucket</h1>
+    <ol>
+        @foreach (var monster in Model.CatalogPage.Items)
+        {
+            <li><a href="/monstres/@monster.Id">@monster.Name</a></li>
+        }
+    </ol>
+    <nav aria-label="Pagination">
+        @if (Model.CatalogPage.HasPreviousPage) { <a href="/monstres/cr/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+        <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+        @if (Model.CatalogPage.HasNextPage) { <a href="/monstres/cr/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+    </nav>
+</main>
+</body>
+</html>

@@ -1,0 +1,18 @@
+@page "/monstres"
+@model PathfinderDb.Web.Pages.Monsters.IndexModel
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8" /><title>Monstres - Pathfinder FR DB</title></head>
+<body>
+<main>
+    <h1>Monstres</h1>
+    <p>Choisissez un facteur de puissance.</p>
+    <ul>
+        @foreach (var challengeRating in Model.ChallengeRatings)
+        {
+            <li><a href="/monstres/cr/@challengeRating">@challengeRating</a></li>
+        }
+    </ul>
+</main>
+</body>
+</html>

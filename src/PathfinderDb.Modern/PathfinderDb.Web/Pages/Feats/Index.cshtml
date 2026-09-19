@@ -1,0 +1,29 @@
+@page "/dons/{initial?}"
+@model PathfinderDb.Web.Pages.Feats.IndexModel
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8" /><title>Dons - Pathfinder FR DB</title></head>
+<body>
+<main>
+    <h1>Dons</h1>
+    <nav aria-label="Initiales">
+        @foreach (var bucket in Model.Buckets)
+        {
+            <a href="/dons/@bucket">@bucket</a>
+        }
+    </nav>
+    <h2>Lettre @Model.CatalogPage!.Bucket</h2>
+    <ol>
+        @foreach (var feat in Model.CatalogPage.Items)
+        {
+            <li><a href="/dons/detail/@feat.Id">@feat.Name</a></li>
+        }
+    </ol>
+    <nav aria-label="Pagination">
+        @if (Model.CatalogPage.HasPreviousPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+        <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+        @if (Model.CatalogPage.HasNextPage) { <a href="/dons/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+    </nav>
+</main>
+</body>
+</html>
