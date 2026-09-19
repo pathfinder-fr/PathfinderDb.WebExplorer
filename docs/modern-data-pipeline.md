@@ -39,6 +39,24 @@ cache policy (`max-age=300`, `s-maxage=3600`, and
 snapshot version and request path. Matching `If-None-Match` requests return
 `304 Not Modified`; a new snapshot automatically produces new ETags.
 
+The optional refresh service can pull the configured clone with
+`git pull --ff-only` and reload the snapshot after a successful pull. It is
+disabled by default to avoid unexpected network or working-tree changes.
+Enable it explicitly with:
+
+```json
+{
+  "PathfinderData": {
+    "RefreshEnabled": true,
+    "RefreshIntervalMinutes": 1440
+  }
+}
+```
+
+Git failures are logged and do not trigger a reload, while data validation
+failures continue to use the snapshot provider's existing atomic/degraded
+behavior.
+
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
 normalization, validation, version hashing, and snapshot index construction.
