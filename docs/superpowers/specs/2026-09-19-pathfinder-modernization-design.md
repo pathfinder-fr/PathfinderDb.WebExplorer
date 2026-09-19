@@ -1,5 +1,23 @@
 # Spécification de modernisation du site Pathfinder FR DB
 
+> **Révision 2** — relecture technique après exploration approfondie du site actuel et du dépôt `pf1-data`. Les sections modifiées ou ajoutées par rapport à la V1 sont signalées par `[MAJ]`. Cette révision ajoute le détail technique nécessaire pour qu'un agent d'implémentation puisse démarrer sans avoir à re-explorer le dépôt de données.
+
+## Demande initiale (texte source, verbatim)
+
+Pour traçabilité, voici la demande exacte formulée par le porteur de produit, qui sert de référence pour toute divergence d'interprétation :
+
+- migrer en .NET 10 ;
+- se baser sur un clone du repo https://github.com/pathfinder-fr/pf1-data qui contient les données qui seront actualisées fréquemment ; ce sera aussi ce clone qui sera utilisé en prod ; en local il est présent dans `D:\code\perso\pf\pf1-data` ;
+- optimiser le démarrage de l'app (rapide) ;
+- moderniser l'affichage en terme de lib : le site doit rester sobre, simple et très rapide à charger ;
+- mieux gérer la navigation : la page d'accueil des feats et des spells les liste TOUS, c'est beaucoup trop couteux et provoque beaucoup trop de volume de transfert réseau ;
+- rendre le site plus résistant au crawling de bots et d'IA : les éléments changent rarement et pourraient être facilement mis en cache CDN ;
+- rendre la navigation le plus prévisible possible, moins personnalisable pour éviter l'explosion combinatoire des cas possibles affichés et les crawlers qui explorent toutes les combinaisons, quitte à supprimer des features dans un premier temps ;
+- gérer les monstres ;
+- améliorer sorts et dons pour gérer les nouveaux cas.
+
+Chacun de ces points est repris et détaillé plus bas ; le tableau de correspondance est en fin de document (section « Traçabilité demande → livrables »).
+
 ## Contexte et domaine
 
 Le projet actuel est un site de référence historique pour la base de données Pathfinder 1e, répondant à l’URL https://db.pathfinder-fr.org/. Il a été construit comme un petit moteur de navigation sur des données extraites de la communauté Pathfinder-fr.org, avec des listes de dons et de sorts publiées sous forme HTML générée côté serveur.
@@ -66,29 +84,95 @@ Le site actuel démontre un besoin clair :
 - éviter les pages de résultats combinatoires trop larges ou trop nombreuses,
 - mettre la source de données au cœur du système pour supprimer la dépendance locale à des XML statiques.
 
+## `[MAJ]` Analyse détaillée du dépôt `pf1-data`
+
+Cette section documente précisément ce qui a été trouvé dans `D:\code\perso\pf\pf1-data` (remote `https://github.com/pathfinder-fr/pf1-data.git`), pour éviter à l'agent technique de devoir ré-explorer le dépôt.
+
+### Nature du dépôt
+
+- `pf1-data` n'est pas un dépôt édité à la main : c'est un **corpus généré** par extraction du wiki Pathfinder-fr.org (fichiers XML MediaWiki bruts référencés dans `diagnostics.json`, ex. `D:\code\perso\pf\pf1-xml\Pathfinder-RPG\*.xml`), transformé par un pipeline d'extraction externe au présent projet.
+- Le dépôt local n'a qu'un seul commit observé (« Initialiser le corpus XML Pathfinder »), ce qui suggère une régénération complète périodique (pas de commits incrémentaux fins). **L'implémentation ne doit donc pas supposer un historique Git riche ni un diff incrémental fiable** : il faut traiter chaque nouvelle version comme un remplacement complet des fichiers de données, et recalculer les index/caches en conséquence.
+- Le dépôt fournit à la fois des exports `*.xml` (format `PathfinderDb.Schema`, compatible avec l'ancien site) et des exports `*.json` plus récents et plus riches (`feats.json`, `spells.json`, `monsters.json`). **Le nouveau projet doit consommer les fichiers `.json`**, qui sont la forme la plus structurée et la plus proche du modèle cible ; les `.xml` sont un format hérité à ne pas utiliser pour la nouvelle app (garder la compatibilité XML n'est pas un objectif).
+- `diagnostics.json` / `diagnostics.md` / `diagnostics.csv` contiennent un **rapport qualité de l'extraction** (`CandidateCount`, `AnalyzedCount`, `ProducedCount`, `DiagnosticCount`, avec des entrées `Severity: info/warning/error` et des règles nommées comme `spell.candidate-not-spell`). Ce rapport doit être exploité par le pipeline d'import : au minimum, bloquer la publication si `ErrorCount > 0` sur une catégorie critique, et logguer/exposer les `WarningCount` pour suivi qualité dans le temps.
+
+### Tailles réelles (ordre de grandeur pour le dimensionnement du cache et du démarrage)
+
+| Fichier | Taille | Contenu |
+|---|---|---|
+| `feats.json` | ~2,8 Mo | ~1133 dons, avec prérequis structurés |
+| `spells.json` | ~3,85 Mo | ~1324+ sorts (2074 produits selon diagnostics), avec écoles, niveaux par liste, composants |
+| `monsters.json` | ~304 Ko | index de monstres, **métadonnées seulement** (voir limitation ci-dessous) |
+| `diagnostics.json` | ~70 Ko | rapport qualité d'extraction |
+
+Ces volumes (au total < 10 Mo) tiennent largement en mémoire ; le chargement initial doit être un simple `JsonSerializer.Deserialize` (idéalement avec **`System.Text.Json` source generation** pour éviter le coût de réflexion au démarrage), pas une base de données externe.
+
+### Schéma observé — `Feat` (`feats.json`)
+
+Champs observés : `Id` (slug), `Name`, `Types` (tableau, ex. `Combat`), `Prerequisites` (tableau hétérogène, voir ci-dessous), `Description`, `Benefit`, `Normal`, `Source` (objet avec `Id` + `References[]`), potentiellement `Localization`.
+
+Les prérequis (`Prerequisites[].Type` / `OtherType`) prennent au moins les valeurs suivantes constatées : `BBA`, `Attribute`, `SkillRank`, `ClassLevel`, `Feat`, `SpellCast`, et un type libre `OtherType` (ex. `ExoticWeaponProficiency`) avec un champ `Value` et une `Description` textuelle de repli. Il existe aussi des groupes de choix (prérequis alternatifs, cf. `FeatPrerequisiteChoice` dans l'ancien code `FeatController.cs`) — **ce mécanisme de choix doit être conservé dans le nouveau modèle**, car il porte une sémantique métier (« l'un OU l'autre des prérequis suffit »).
+
+### Schéma observé — `Spell` (`spells.json`)
+
+Champs observés : `Id`, `Name`, `School`, `Levels[]` (`List` + `Level`, une entrée par liste de classe, ex. `bard`, `sorcerer-wizard`, `cleric`, `psychiste`), `Components.Kinds` (texte libre du type `"Verbal, Somatic, FocusOrDivineFocus"`), `Range`, `Target`, `CastingTime`, `Source` (`Id` + `References[]`), `Localization.Languages[]` (traductions, ex. nom anglais).
+
+Point notable : de nouvelles listes de classes apparaissent déjà dans les données (`psychiste`) qui n'existaient pas forcément dans l'ancien modèle `PathfinderDb.Schema` — **le modèle de listes de classes ne doit pas être une énumération figée côté code**, mais dérivé dynamiquement des données (`SpellLists` présent dans le fichier, actuellement vide mais prévu comme référentiel).
+
+### Schéma observé — `Monster` (`monsters.json`) — **limitation importante**
+
+Contrairement à `Feat` et `Spell`, les entrées `Monster` observées ne contiennent **que des métadonnées d'index** :
+
+```json
+{
+  "Id": "tortue-de-mer",
+  "Name": "Tortue de mer",
+  "CR": 1.0,
+  "Climate": "Temperate",
+  "Environment": "Aquatic",
+  "Type": "Animal",
+  "Source": { "Id": "um" }
+}
+```
+
+Il n'y a **pas de bloc de statistiques complet** (PV, CA, attaques, capacités spéciales, texte descriptif) dans l'export actuel. Cela a un impact direct sur la portée réalisable de la fonctionnalité « Gérer les monstres » :
+
+- **Ce qui est faisable dès maintenant avec les données existantes** : liste/index des monstres, filtres par CR / type / environnement / climat / source, lien vers la source (livre) — c'est-à-dire un catalogue de références, pas des fiches de statblock complètes.
+- **Ce qui nécessite une évolution du dépôt `pf1-data` en amont** : toute fiche de détail avec statistiques de jeu complètes. Ce point doit être vérifié avec le mainteneur de `pf1-data` avant de promettre des fiches de monstre détaillées ; voir la question ouverte correspondante en fin de document.
+
+### Sources (`Sources[]`)
+
+Liste commune aux trois fichiers : `uc`, `pfrpg`, `um`, `apg`, `paizoBlog`, `bestiary`, `bestiary2`, `bestiary3`, `bestiary4`, `bestiary5`, `codexmonstrueux`, `bookofthedamned`. Cette liste est plus riche que l'ancien site (qui ne chargeait que `apg`, `pfrpg`, `uc`, `um` dans `MemoryDataSet.DataSetNames` et laissait de côté les bestiaires) : **la nouvelle app doit traiter la liste des sources comme dynamique**, dérivée du fichier `Sources[]` à chaque chargement, jamais codée en dur.
+
 ## Cible technique
 
 ### Stack
 
-- ASP.NET Core 10 / .NET 10
-- Razor Pages ou ASP.NET Core MVC selon le besoin d’UI server-side
-- HTML/CSS minimal, sans dépendances lourdes de frontend
-- pipeline de génération de données depuis `pf1-data`
-- cache HTTP / CDN / ETag / `Cache-Control`
-- sortie statique ou quasi-statique pour les pages à forte lecture
+- ASP.NET Core 10 / .NET 10, **Razor Pages** recommandé plutôt que MVC classique (moins de cérémonie pour des pages essentiellement en lecture, correspond mieux à un découpage par route/section) ; MVC reste acceptable si l'équipe a une préférence forte, mais éviter de mélanger les deux styles.
+- HTML/CSS minimal, sans framework JS de rendu (pas de React/Vue/Blazor WASM). Un peu de JS vanilla est acceptable pour des interactions ponctuelles (ex. repli d'une section), mais ce n'est pas un SPA.
+- `System.Text.Json` avec **source generation** (`JsonSerializerContext`) pour désérialiser `feats.json` / `spells.json` / `monsters.json` sans réflexion au démarrage.
+- **Output Caching** (`Microsoft.AspNetCore.OutputCaching`, intégré à ASP.NET Core depuis .NET 7+) pour le cache serveur des pages de liste et de détail, avec des tags d'invalidation par entité (`feat`, `spell`, `monster`) purgés uniquement au rechargement d'une nouvelle version de `pf1-data`.
+- **Response Compression** (Brotli + Gzip) activée par défaut.
+- Envisager la **compilation AOT / ReadyToRun** (`PublishAot` ou `PublishReadyToRun`) pour réduire le temps de démarrage JIT, à valider en étape 2 selon compatibilité avec Razor (AOT complet et Razor runtime compilation ne font pas toujours bon ménage ; ReadyToRun est le choix le plus sûr si Razor Pages est compilé au build).
+- Pas de base de données relationnelle en v1 : les données tiennent en mémoire (~7 Mo de JSON), donc un simple modèle « chargé au démarrage, réindexé en dictionnaires par clé/slug » est suffisant et plus rapide qu'une base externe.
 
-### Source de vérité
+### Source de vérité et cycle de mise à jour `[MAJ]`
 
-Le dépôt `pf1-data` est considéré comme le référentiel de production des données. Il contient des exports structurés (`feats.json`, `spells.json`, `monsters.json`, etc.) et est utilisé comme source d’actualisation de contenu. Le projet web ne doit pas conduire de maintenance ad hoc dans des XML embarqués.
+Le dépôt `pf1-data` est le référentiel de production des données, sous forme de fichiers `.json` (pas les `.xml`, qui sont un format hérité conservé pour compatibilité avec l'ancien site mais pas utilisé ici).
+
+Points à trancher techniquement (cf. questions ouvertes) :
+
+- **Mode de synchronisation en production** : clone Git mis à jour par un job planifié (ex. `git pull` + redémarrage/rechargement à chaud), vs. déploiement qui embarque une version figée de `pf1-data` à chaque build. Le besoin exprimé (« actualisées fréquemment ») pousse vers un rafraîchissement **sans redéploiement complet de l'app** : un service de fond qui vérifie périodiquement (ex. toutes les X minutes/heures) si le HEAD du dépôt a changé, recharge les fichiers JSON en mémoire, et purge les caches de sortie taggés en conséquence.
+- Le chargement doit rester **atomique** du point de vue des lecteurs : construire le nouveau jeu de données en mémoire, puis substituer la référence (pattern « double buffering » / `Interlocked.Exchange` sur une référence immuable), jamais de mutation en place pendant qu'une requête est en cours.
+- Le format `.json` n'ayant pas de garantie de compatibilité de schéma dans le temps (pas de fichier de schéma JSON versionné identifié dans le dépôt), l'import doit être tolérant aux champs additionnels (désérialisation permissive) et strict sur les champs requis, avec échec explicite et log clair si un champ obligatoire disparaît.
 
 ### Architecture proposée
 
-- `Data source` : clone de `pf1-data` en production
-- `Import / normalization` : service de conversion des fichiers JSON/XML vers des modèles internes normalisés
-- `Content model` : entités Feat, Spell, Monster, source, references, prerequisites, etc.
-- `Runtime app` : site web ASP.NET Core 10 qui expose des routes déterministes
-- `Cache layer` : CDN + cache HTTP + cache mémoire pour les listes indexées et les détails
-- `Build pipeline` : génération de données et validation des schémas avant publication
+- `Data source` : clone Git de `pf1-data`, rafraîchi périodiquement en production (voir ci-dessus), monté en local via `D:\code\perso\pf\pf1-data` pour le développement.
+- `Import / normalization` : bibliothèque dédiée (projet `PathfinderDb.Data` ou équivalent) qui désérialise les JSON, valide via `diagnostics.json`, et construit des modèles internes typés + index par slug/lettre/section/CR/etc.
+- `Content model` : entités `Feat`, `Spell`, `Monster`, `Source`, `Reference`, `Prerequisite` (avec support des groupes de choix), `SpellLevel`, indépendantes de la forme JSON source.
+- `Runtime app` : site web ASP.NET Core 10 (Razor Pages) qui expose des routes déterministes en lecture seule sur ces modèles.
+- `Cache layer` : Output Cache serveur (tags par entité) + en-têtes HTTP orientés CDN pour les pages stables ; pas de cache applicatif ad hoc supplémentaire nécessaire vu le faible volume de données.
+- `Refresh pipeline` : tâche d'arrière-plan (`IHostedService`) qui surveille `pf1-data`, recharge et republie sans redémarrage du processus.
 
 ## Exigences fonctionnelles
 
@@ -188,23 +272,31 @@ Critère de validation :
 
 ## Décisions de conception
 
-### 1. Limiter les dimensions de navigation
+### 1. Limiter les dimensions de navigation `[MAJ]` schéma de routes définitif
 
-La navigation ne doit plus proposer une combinatoire illimitée. Concrètement, l’application doit exposer des chemins lisibles et prévisibles, pas un moteur de recherche paramétré infini.
+La navigation ne doit plus proposer une combinatoire illimitée. Concrètement, l’application doit exposer des chemins lisibles et prévisibles, pas un moteur de recherche paramétré infini. Le principe retenu : **une seule dimension de filtrage par route, jamais de combinaison de plusieurs paramètres de query string arbitraires**.
 
-Exemples de routes attendues :
+Routes proposées (à valider avec le porteur de produit, mais servent de défaut pour l'implémentation) :
 
-- `/dons` : page d’audit / index général avec sections déterministes
-- `/dons/a-c` : tranche alphabétique
-- `/dons/combats` : sous-section par type
-- `/sorts` : index général
-- `/sorts/a-c` : tranche alphabétique
-- `/sorts/niveau/1` : filtre stable et public
-- `/monstres/cr/1` : filtre stable et public
+- `/` : portail d'accueil, liens vers les 3 catalogues + présentation courte
+- `/dons` : index alphabétique paginé (pas de liste intégrale) — tranches fixes type `/dons?page=A` ou sous-chemins `/dons/a`, `/dons/b`, … `/dons/0-9` (26 + 1 valeurs possibles, fermé, non combinatoire)
+- `/dons/{slug}` : fiche de détail d'un don (ex. `/dons/adepte-de-la-matraque`)
+- `/dons/type/{type}` : une sous-vue par type de don, où `{type}` est une valeur fermée dérivée des `Types` réellement présents dans les données (ex. `combat`, `general`) — **liste énumérée générée depuis les données au démarrage, pas une route libre**
+- `/sorts` : index alphabétique paginé, même principe que `/dons`
+- `/sorts/{slug}` : fiche de détail d'un sort
+- `/sorts/niveau/{classe}/{niveau}` : une vue par (liste de classe, niveau), les deux valeurs étant des ensembles fermés dérivés des données (`Levels[].List` / `Levels[].Level`)
+- `/monstres` : index paginé par CR ou alphabétique (à trancher, cf. questions ouvertes)
+- `/monstres/{slug}` : fiche de détail (catalogue, cf. limitation du modèle de données ci-dessus)
+- `/monstres/cr/{cr}` : sous-vue par CR fermé (valeurs réellement présentes dans les données)
+- `/sources` et `/sources/{id}` : page listant les livres sources et leur contenu, utile pour la navigation et pour les références
+
+Règle générale anti-combinatoire : **chaque route ne doit accepter qu'un seul paramètre de segmentation à la fois** (soit alphabet, soit type, soit niveau, soit CR), jamais une combinaison libre du type `?type=x&source=y&classe=z`. Si un besoin de croisement de filtres apparaît plus tard, il devra être explicitement re-brainstormé plutôt qu'ajouté de façon incrémentale (risque d'explosion combinatoire et de re-création de l'ancien problème).
 
 Pas de route générique type :
 
 - `/search?type=x&source=y&class=z&...` explosant les combinaisons
+- pas de query string libre acceptant une combinaison de filtres non prévue à l'avance
+- pas de tri/pagination paramétrable à volonté (taille de page fixe côté serveur, ex. 100 éléments par tranche alphabétique)
 
 ### 2. Préférer le server-rendered / pre-rendered
 
@@ -219,7 +311,7 @@ Le projet doit traiter le contenu comme un pipeline :
 - génération des index / pages / caches,
 - publication du site.
 
-### 4. Préparer la cacheabilité CDN
+### 4. Préparer la cacheabilité CDN `[MAJ]` mécanique concrète
 
 Les pages qui sont des références stables doivent être publiées comme contenu quasi statique. Cela couvre :
 
@@ -227,6 +319,14 @@ Les pages qui sont des références stables doivent être publiées comme conten
 - index par lettre / section,
 - listes de sources ou types connus,
 - résultats de répertoires déterministes.
+
+Mécanique HTTP concrète recommandée :
+
+- **En-têtes** : `Cache-Control: public, max-age=3600, stale-while-revalidate=86400` sur les pages de contenu stable (fiches + index), ajustable selon la fréquence réelle de mise à jour de `pf1-data` (probablement une actualisation par jour ou moins fréquente).
+- **`ETag`** calculé à partir d'un hash du contenu de la page (ou d'une version globale du jeu de données, ex. hash du commit `pf1-data` chargé), pour permettre les réponses `304 Not Modified` sans recalcul.
+- **Output Cache serveur** en complément, avec des tags par entité (`feat:{slug}`, `spell:{slug}`, `monster:{slug}`, `dons-index`, `sorts-index`, …) purgés uniquement lors du rechargement d'une nouvelle version de `pf1-data` — pas de TTL court arbitraire qui recalculerait inutilement des pages qui ne changent jamais entre deux mises à jour de données.
+- Le calcul de la version « globale » du jeu de données (utilisée pour l'ETag et l'invalidation) doit être dérivé du commit SHA du clone `pf1-data` chargé, disponible facilement via `git rev-parse HEAD` au moment du chargement.
+- Pas de cookies ni d'état de session sur les pages cacheables : toute personnalisation (thème, préférences) doit être gérée côté client uniquement (CSS/JS local), jamais via une réponse serveur variable par utilisateur, pour ne pas casser la cacheabilité CDN.
 
 ## Livrables par étapes
 
@@ -318,22 +418,24 @@ Validation :
 - le chargement initial reste rapide,
 - les ressources statiques sont minimales et bien cacheables.
 
-### Étape 6 — Monstres et contenu avancé
+### Étape 6 — Monstres et contenu avancé `[MAJ]`
 
-Livrable testable : le domaine `Monster` est pleinement intégré à la base de données et à la navigation.
+Livrable testable : le domaine `Monster` est pleinement intégré à la base de données et à la navigation, **dans la limite des données disponibles aujourd'hui dans `pf1-data`** (métadonnées d'index uniquement, pas de statblock complet — voir analyse ci-dessus).
 
 À livrer :
 
-- page d’index monstres,
-- pages de détail,
-- filtres CR / type / environnement / climat / source,
-- support de génération des données depuis `pf1-data`.
+- page d’index monstres (alphabétique et/ou par CR),
+- pages de détail avec les champs disponibles (nom, CR, type, environnement, climat, source, lien vers la référence externe le cas échéant),
+- filtres CR / type / environnement / climat / source, un seul à la fois (cf. règle anti-combinatoire),
+- support de génération des données depuis `pf1-data`,
+- **placeholder explicite et honnête** sur la fiche de détail si aucune statistique de jeu n'est disponible (ne pas inventer de contenu ni laisser un vide silencieux).
 
 Validation :
 
 - les monstres sont visibles et navigables,
-- les propriétés métier sont cohérentes et représentées, 
-- les pages sont compatibles avec la stratégie de cache et de navigation simplifiée.
+- les propriétés métier disponibles sont cohérentes et représentées,
+- les pages sont compatibles avec la stratégie de cache et de navigation simplifiée,
+- il est explicite pour l'utilisateur que la fiche de monstre est un résumé/catalogue et non un statblock complet, tant que `pf1-data` ne fournit pas plus de détail.
 
 ### Étape 7 — Dons, sorts et nouveaux cas
 
@@ -350,6 +452,32 @@ Validation :
 - l’application rend correctement les cas complexifiés du corpus,
 - les données de `pf1-data` ne nécessitent plus de hacks ad hoc,
 - les erreurs structurelles sont détectées avant publication.
+
+## `[MAJ]` Questions ouvertes / risques à trancher avant ou pendant l'implémentation
+
+Ces points ne sont pas bloquants pour démarrer l'étape 1, mais doivent être arbitrés avant les étapes concernées :
+
+1. **Portée réelle des monstres** — `monsters.json` ne contient pas de statblock complet aujourd'hui. Faut-il (a) livrer un catalogue de références (portée réaliste immédiate), (b) attendre une évolution de `pf1-data` qui ajoute les statblocks, ou (c) enrichir manuellement/via un autre pipeline en parallèle ? Impact direct sur l'étape 6.
+2. **Mécanisme de synchronisation prod du clone `pf1-data`** — `git pull` planifié avec rechargement à chaud, vs. artefact figé par déploiement. Le choix impacte l'architecture du `Refresh pipeline` (étape 1/2) et la fraîcheur réelle des données.
+3. **Hébergement et CDN cible** — la stratégie de cache (`Cache-Control`, `stale-while-revalidate`) suppose un CDN en frontal (Cloudflare, Azure Front Door, etc.). Le choix concret n'est pas fixé ; à confirmer pour dimensionner les en-têtes et les règles de purge.
+4. **Segmentation exacte des index** (alphabet vs pagination numérique vs les deux) — proposé par défaut : alphabet pour dons/sorts, CR pour monstres, mais à valider avec le porteur de produit sur la base du volume réel par tranche (ex. la lettre la plus fréquente ne doit pas produire une page trop lourde même après segmentation).
+5. **Design visuel** — la spec demande « sobre, simple, rapide », mais ne fixe pas de charte graphique. Un moodboard ou une référence de style minimal (ex. type documentation technique) serait utile avant l'étape 5, potentiellement via le companion visuel de brainstorming.
+6. **Fonctionnalités supprimées vs. différées** — l'ancien site permettait des recherches combinées (attributs, classes, niveaux multiples pour les dons). Cette spec choisit de **supprimer** ces combinaisons plutôt que de les limiter techniquement. Confirmer qu'aucun usage identifié aujourd'hui ne dépend spécifiquement de ces combinaisons avancées avant suppression définitive.
+7. **AOT / ReadyToRun** — à valider techniquement en étape 2 : compatibilité avec Razor Pages et le hébergeur cible, avant de s'engager sur cette option de démarrage rapide.
+
+## `[MAJ]` Traçabilité demande → livrables
+
+| Demande initiale | Section(s) de la spec | Étape(s) |
+|---|---|---|
+| Migrer en .NET 10 | Cible technique / Stack | Étape 1 |
+| Se baser sur le clone `pf1-data`, aussi utilisé en prod | Analyse détaillée du dépôt `pf1-data` / Source de vérité et cycle de mise à jour | Étape 1 |
+| Optimiser le démarrage | Stack (System.Text.Json source gen, AOT/R2R) / Étape 2 | Étape 2 |
+| Moderniser l'affichage, sobre et rapide | Simplicité et sobriété du front | Étape 5 |
+| Page d'accueil dons/sorts trop coûteuse (liste tout) | Navigation et performance / routing définitif | Étape 3 |
+| Résister au crawling bots/IA, cache CDN | Cache et crawl resistance / mécanique de cache concrète | Étape 4 |
+| Navigation prévisible, anti-combinatoire, quitte à supprimer des features | Décisions de conception §1 (routing définitif) / À ne pas faire | Étape 3 |
+| Gérer les monstres | Gestion des monstres (avec limitation documentée) | Étape 6 |
+| Améliorer sorts et dons pour les nouveaux cas | Amélioration des dons et des sorts / schémas Feat, Spell détaillés | Étape 7 |
 
 ## Critères de succès globaux
 
