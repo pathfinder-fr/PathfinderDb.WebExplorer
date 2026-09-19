@@ -66,6 +66,29 @@ styles, accessible navigation labels, and compact catalogue/detail components.
 The visual layer is kept static and server-rendered so it does not add a
 client-side framework or reduce CDN cacheability.
 
+The homepage is reader-first: it presents direct entry points for dons, sorts,
+and monstres before the technical snapshot status. The shared shell uses the
+legacy `pf-fr-db.png` logo on a warm parchment/ivory palette with serif
+headings; the logo is copied into the modern static assets but the legacy
+application remains unchanged.
+
+The `/dons` and `/sorts` pages are selectors and no longer open an arbitrary
+first alphabetical bucket. They expose the following deterministic, paginated
+catalog routes:
+
+* `/dons/type/{type}`
+* `/dons/source/{source}`
+* `/sorts/ecole/{school}`
+* `/sorts/classe/{class}`
+* `/sorts/source/{source}`
+
+Each route uses the immutable snapshot indexes, keeps the fixed 50-item page
+size, preserves the existing cache headers and output-cache policy, and returns
+404 for an unknown bucket or page. Spell classes/lists, schools, feat types,
+and sources are discovered from the loaded JSON rather than maintained as a
+hard-coded enumeration; this keeps values such as `psychiste` available when
+present in the data.
+
 Monster navigation is available by challenge rating, type, and source:
 
 * `/monstres/cr/{challengeRating}`

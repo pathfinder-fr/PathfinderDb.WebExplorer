@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Options;
+using PathfinderDb.Data.Domain;
 using PathfinderDb.Data.Import;
+using PathfinderDb.Data.Runtime;
 using System.Diagnostics;
 using Xunit;
 
@@ -30,9 +32,36 @@ public sealed class RealPf1DataTests
         Assert.False(string.IsNullOrWhiteSpace(result.Version));
         Assert.True(result.Snapshot.Feats.Count > 100);
         Assert.True(result.Snapshot.Spells.Count > 100);
+        Assert.NotEmpty(result.Snapshot.SpellsBySchool);
+        Assert.NotEmpty(result.Snapshot.SpellsByList);
+        Assert.NotEmpty(result.Snapshot.SpellsBySource);
+        Assert.NotEmpty(result.Snapshot.FeatsByType);
+        Assert.NotEmpty(result.Snapshot.FeatsBySource);
+
+        var catalogs = new CatalogService(new SnapshotProvider(result.Snapshot));
+        var school = result.Snapshot.SpellsBySchool.Keys.First();
+        var spellClass = result.Snapshot.SpellsByList.Keys.First();
+        var spellSource = result.Snapshot.SpellsBySource.Keys.First();
+        var featType = result.Snapshot.FeatsByType.Keys.First();
+        var featSource = result.Snapshot.FeatsBySource.Keys.First();
+        Assert.NotNull(catalogs.GetSpellsBySchool(school));
+        Assert.NotNull(catalogs.GetSpellsByList(spellClass));
+        Assert.NotNull(catalogs.GetSpellsBySource(spellSource));
+        Assert.NotNull(catalogs.GetFeatsByType(featType));
+        Assert.NotNull(catalogs.GetFeatsBySource(featSource));
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2),
             $"Loading and indexing pf1-data took {stopwatch.Elapsed.TotalMilliseconds:0} ms.");
     }
+}
+
+internal sealed class SnapshotProvider(DataSnapshot snapshot) : IDataSnapshotProvider
+{
+    public DataSnapshot? Current => snapshot;
+    public DataLoadStatus Status => DataLoadStatus.ReadyStatus(snapshot, []);
+    public Task<DataLoadStatus> LoadInitialAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(Status);
+    public Task<DataLoadStatus> ReloadAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(Status);
 }
 
 internal static class Skip
