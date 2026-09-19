@@ -162,9 +162,10 @@ clone externe `pf1-data` :
 - `monsters.json`
 
 Le chemin du clone est configuré par `PathfinderData:RootPath`, ou par la
-variable d'environnement `PathfinderData__RootPath`. En développement local,
-la valeur attendue est `D:\code\perso\pf\pf1-data`. Les fichiers JSON de
-production ne doivent pas être copiés dans ce dépôt.
+variable d'environnement `PathfinderData__RootPath`. La valeur par défaut de
+production est `E:\websites\Pathfinder-FR\pf1-data`. En développement local,
+`appsettings.Development.json` utilise `D:\code\perso\pf\pf1-data`. Les
+fichiers JSON de production ne doivent pas être copiés dans ce dépôt.
 
 Commandes de validation de la fondation moderne :
 

@@ -9,8 +9,10 @@ legacy MVC application. It reads only the three root exports from an external
 * `monsters.json`
 * `labels.json` (generated shared technical-label catalogue)
 
-Configure the clone with `PathfinderData:RootPath` (for example
-`D:\code\perso\pf\pf1-data`), or set `PathfinderData__RootPath` in an environment.
+Configure the clone with `PathfinderData:RootPath` (the production default is
+`E:\websites\Pathfinder-FR\pf1-data`), or set `PathfinderData__RootPath` in an
+environment. For local development, `appsettings.Development.json` uses
+`D:\code\perso\pf\pf1-data`.
 The clone is deliberately not copied into the application output or committed to
 this repository.
 
