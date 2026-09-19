@@ -1,6 +1,7 @@
 .vs/
 packages/
 graphify-out/
+.worktrees/
 
 #################
 ## Eclipse
