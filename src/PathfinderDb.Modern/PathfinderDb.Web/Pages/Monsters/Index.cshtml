@@ -8,24 +8,24 @@
     <h1>Monstres</h1>
     <p class="intro">Choisissez un facteur de puissance pour parcourir les créatures.</p>
     <h2>Par facteur de puissance</h2>
-    <nav class="bucket-nav" aria-label="Facteurs de puissance">
+    <nav class="catalog-list" aria-label="Facteurs de puissance">
         @foreach (var challengeRating in Model.ChallengeRatings)
         {
             <a href="/monstres/cr/@CatalogText.FormatChallengeRating(challengeRating)">@CatalogText.FormatChallengeRating(challengeRating)</a>
         }
     </nav>
     <h2>Par type</h2>
-    <nav class="bucket-nav" aria-label="Types de monstres">
+    <nav class="catalog-list" aria-label="Types de monstres">
         @foreach (var type in Model.Types)
         {
-            <a href="/monstres/type/@type">@type</a>
+            <a href="/monstres/type/@type">@CatalogText.FormatMonsterType(type)</a>
         }
     </nav>
     <h2>Par source</h2>
-    <nav class="bucket-nav" aria-label="Sources des monstres">
+    <nav class="catalog-list" aria-label="Sources des monstres">
         @foreach (var source in Model.Sources)
         {
-            <a href="/monstres/source/@source">@source</a>
+            <a href="/monstres/source/@source">@CatalogText.FormatSource(source)</a>
         }
     </nav>
 </section>

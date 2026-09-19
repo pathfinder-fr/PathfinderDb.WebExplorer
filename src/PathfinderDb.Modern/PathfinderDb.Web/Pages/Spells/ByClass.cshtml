@@ -1,12 +1,12 @@
 @page "/sorts/classe/{class}"
 @model PathfinderDb.Web.Pages.Spells.ByClassModel
 @{
-    ViewData["Title"] = $"Sorts de la classe {Model.CatalogPage!.Bucket}";
+    ViewData["Title"] = $"Sorts de la classe {CatalogText.FormatSpellList(Model.CatalogPage!.Bucket)}";
 }
 <section class="page-card">
     <p><a href="/sorts">← Tous les sorts</a></p>
     <p class="eyebrow">Catalogue par classe</p>
-    <h1>Sorts de la classe @Model.CatalogPage!.Bucket</h1>
+    <h1>Sorts de la classe @CatalogText.FormatSpellList(Model.CatalogPage!.Bucket)</h1>
     <ol class="catalog-list">
         @foreach (var spell in Model.CatalogPage.Items)
         {

@@ -1,12 +1,12 @@
 @page "/dons/type/{type}"
 @model PathfinderDb.Web.Pages.Feats.ByTypeModel
 @{
-    ViewData["Title"] = $"Dons de type {Model.CatalogPage!.Bucket}";
+    ViewData["Title"] = $"Dons de type {CatalogText.FormatFeatType(Model.CatalogPage!.Bucket)}";
 }
 <section class="page-card">
     <p><a href="/dons">← Tous les dons</a></p>
     <p class="eyebrow">Catalogue par type</p>
-    <h1>Dons de type @Model.CatalogPage!.Bucket</h1>
+    <h1>Dons de type @CatalogText.FormatFeatType(Model.CatalogPage!.Bucket)</h1>
     <ol class="catalog-list">
         @foreach (var feat in Model.CatalogPage.Items)
         {

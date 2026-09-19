@@ -8,8 +8,8 @@
     <p class="eyebrow">Monstre</p>
     <h1>@Model.Monster!.Name</h1>
     <dl class="detail-grid">
-        <div><dt>CR</dt><dd>@Model.Monster.ChallengeRating</dd></div>
-        <div><dt>Type</dt><dd>@Model.Monster.Type</dd></div>
+        <div><dt>CR</dt><dd>@(Model.Monster.ChallengeRating is { } challengeRating ? CatalogText.FormatChallengeRating(challengeRating) : "—")</dd></div>
+        <div><dt>Type</dt><dd>@(Model.Monster.Type is { } type ? CatalogText.FormatMonsterType(type) : "—")</dd></div>
         <div><dt>Environnement</dt><dd>@Model.Monster.Environment</dd></div>
         <div><dt>Climat</dt><dd>@Model.Monster.Climate</dd></div>
     </dl>

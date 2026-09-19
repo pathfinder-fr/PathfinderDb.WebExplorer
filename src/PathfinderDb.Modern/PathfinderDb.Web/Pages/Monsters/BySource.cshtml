@@ -1,12 +1,12 @@
 @page "/monstres/source/{source}"
 @model PathfinderDb.Web.Pages.Monsters.BySourceModel
 @{
-    ViewData["Title"] = $"Monstres de la source {Model.CatalogPage!.Bucket}";
+    ViewData["Title"] = $"Monstres de la source {CatalogText.FormatSource(Model.CatalogPage!.Bucket)}";
 }
 <section class="page-card">
     <p><a href="/monstres">← Tous les monstres</a></p>
     <p class="eyebrow">Catalogue par source</p>
-    <h1>Monstres de la source @Model.CatalogPage!.Bucket</h1>
+    <h1>Monstres de la source @CatalogText.FormatSource(Model.CatalogPage!.Bucket)</h1>
     <ol class="catalog-list">
         @foreach (var monster in Model.CatalogPage.Items)
         {

@@ -1,12 +1,12 @@
 @page "/dons/source/{source}"
 @model PathfinderDb.Web.Pages.Feats.BySourceModel
 @{
-    ViewData["Title"] = $"Dons de la source {Model.CatalogPage!.Bucket}";
+    ViewData["Title"] = $"Dons de la source {CatalogText.FormatSource(Model.CatalogPage!.Bucket)}";
 }
 <section class="page-card">
     <p><a href="/dons">← Tous les dons</a></p>
     <p class="eyebrow">Catalogue par source</p>
-    <h1>Dons de la source @Model.CatalogPage!.Bucket</h1>
+    <h1>Dons de la source @CatalogText.FormatSource(Model.CatalogPage!.Bucket)</h1>
     <ol class="catalog-list">
         @foreach (var feat in Model.CatalogPage.Items)
         {

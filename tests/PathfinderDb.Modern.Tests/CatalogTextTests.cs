@@ -42,4 +42,51 @@ public sealed class CatalogTextTests
         Assert.Contains("Acrobatics", text);
         Assert.Contains("5", text);
     }
+
+    [Theory]
+    [InlineData("Fey", "Fées")]
+    [InlineData("Outsider", "Extérieur")]
+    [InlineData("MagicalBeast", "Bête magique")]
+    [InlineData("unknown-type", "unknown-type")]
+    public void Formats_monster_types_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, CatalogText.FormatMonsterType(value));
+    }
+
+    [Theory]
+    [InlineData("um", "L’art de la magie")]
+    [InlineData("apg", "Règles avancées")]
+    [InlineData("unknown-source", "unknown-source")]
+    public void Formats_sources_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, CatalogText.FormatSource(value));
+    }
+
+    [Theory]
+    [InlineData("bard", "Barde")]
+    [InlineData("sorcerer-wizard", "Ensorceleur / Magicien")]
+    [InlineData("psychiste", "Psychiste")]
+    [InlineData("unknown-class", "unknown-class")]
+    public void Formats_spell_lists_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, CatalogText.FormatSpellList(value));
+    }
+
+    [Theory]
+    [InlineData("Conjuration", "Invocation")]
+    [InlineData("Necromancy", "Nécromancie")]
+    [InlineData("unknown-school", "unknown-school")]
+    public void Formats_spell_schools_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, CatalogText.FormatSpellSchool(value));
+    }
+
+    [Theory]
+    [InlineData("Combat", "Combat")]
+    [InlineData("ItemCreation", "Création d’objets")]
+    [InlineData("unknown-feat-type", "unknown-feat-type")]
+    public void Formats_feat_types_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, CatalogText.FormatFeatType(value));
+    }
 }

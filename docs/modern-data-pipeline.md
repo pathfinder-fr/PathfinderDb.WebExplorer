@@ -104,6 +104,13 @@ JSON exports, including prerequisite choices, normal text, source, spell
 components, target, casting time, and localization values. Missing optional
 fields remain omitted rather than rendered as empty placeholders.
 
+Technical category values remain canonical in the snapshot and URLs, but the
+Razor presentation layer translates known values for readers. For example,
+`um` is displayed as `L’art de la magie`, `bard` as `Barde`, `Conjuration` as
+`Invocation`, and `Fey` as `Fées`. The mappings reuse the legacy application's
+French terminology where available and fall back to the original value for
+new or unknown data values, so dynamic catalog discovery is preserved.
+
 Monster challenge-rating route values use invariant decimal formatting (for
 example `1.5`) for both catalogue links and route buckets, regardless of the
 server's current UI culture. Trailing zeroes are removed, so an integer CR is

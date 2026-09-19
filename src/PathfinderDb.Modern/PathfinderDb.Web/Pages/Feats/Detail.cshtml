@@ -7,7 +7,7 @@
     <p><a href="/dons">← Tous les dons</a></p>
     <p class="eyebrow">Don</p>
     <h1>@Model.Feat!.Name</h1>
-    @if (Model.Feat.Types.Count > 0) { <p><strong>Types :</strong> @string.Join(", ", Model.Feat.Types)</p> }
+    @if (Model.Feat.Types.Count > 0) { <p><strong>Types :</strong> @string.Join(", ", Model.Feat.Types.Select(CatalogText.FormatFeatType))</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Description)) { <p>@Model.Feat.Description</p> }
     @if (Model.Feat.Prerequisites.Count > 0)
     {
@@ -21,5 +21,5 @@
     }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Benefit)) { <h2>Avantage</h2><p>@Model.Feat.Benefit</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Normal)) { <h2>Normal</h2><p>@Model.Feat.Normal</p> }
-    @if (Model.Feat.Source is not null) { <p class="intro">Source : @Model.Feat.Source.Id</p> }
+    @if (Model.Feat.Source is not null) { <p class="intro">Source : @CatalogText.FormatSource(Model.Feat.Source.Id)</p> }
 </article>
