@@ -15,6 +15,14 @@ public sealed class CatalogTextTests
     }
 
     [Fact]
+    public void Omits_decimal_suffix_for_integer_challenge_rating()
+    {
+        var text = CatalogText.FormatChallengeRating(14.0m);
+
+        Assert.Equal("14", text);
+    }
+
+    [Fact]
     public void Formats_nested_feat_prerequisites_for_detail_pages()
     {
         var prerequisite = new Prerequisite(

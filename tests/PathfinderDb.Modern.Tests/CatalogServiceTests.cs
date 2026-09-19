@@ -84,6 +84,22 @@ public sealed class CatalogServiceTests
         }
     }
 
+    [Fact]
+    public void Monster_integer_challenge_rating_bucket_omits_decimal_suffix()
+    {
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [],
+            [],
+            [new Monster("integer", "Integer", 14.0m, null, null, null, null)],
+            [],
+            "version")));
+
+        var page = service.GetMonsters("14");
+
+        Assert.NotNull(page);
+        Assert.Equal("14", page!.Bucket);
+    }
+
     private sealed class TestProvider(DataSnapshot snapshot) : IDataSnapshotProvider
     {
         public DataSnapshot? Current => snapshot;

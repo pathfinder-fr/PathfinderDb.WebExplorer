@@ -77,7 +77,7 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
         return new CatalogPage<T>(
             bucket switch
             {
-                decimal decimalBucket => decimalBucket.ToString(CultureInfo.InvariantCulture),
+                decimal decimalBucket => decimalBucket.ToString("G29", CultureInfo.InvariantCulture),
                 _ => bucket.ToString()!
             },
             page,

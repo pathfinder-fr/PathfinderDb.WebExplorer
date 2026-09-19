@@ -83,7 +83,9 @@ fields remain omitted rather than rendered as empty placeholders.
 
 Monster challenge-rating route values use invariant decimal formatting (for
 example `1.5`) for both catalogue links and route buckets, regardless of the
-server's current UI culture.
+server's current UI culture. Trailing zeroes are removed, so an integer CR is
+rendered as `14` rather than `14.0`; the current real export contains integer
+CR values.
 
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
