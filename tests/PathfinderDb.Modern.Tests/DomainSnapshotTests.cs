@@ -18,5 +18,7 @@ public sealed class DomainSnapshotTests
         Assert.Equal("Alpha", snapshot.Feats[0].Name);
         Assert.True(snapshot.FeatsById.ContainsKey("zeta"));
         Assert.Contains("psychiste", snapshot.SpellLists);
+        Assert.Equal(["Alpha"], snapshot.FeatsByInitial["A"].Select(x => x.Name));
+        Assert.Equal(["Monster"], snapshot.MonstersByChallengeRating[1].Select(x => x.Name));
     }
 }

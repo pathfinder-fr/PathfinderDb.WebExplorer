@@ -22,6 +22,9 @@ public sealed class DataSnapshot
         SourcesById = ReadOnlyDictionary(Sources.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase));
         SpellLists = Spells.SelectMany(x => x.Levels).Select(x => x.List).Distinct(StringComparer.OrdinalIgnoreCase)
             .Order(StringComparer.OrdinalIgnoreCase).ToArray();
+        FeatsByInitial = BuildInitialIndex(Feats);
+        SpellsByInitial = BuildInitialIndex(Spells);
+        MonstersByChallengeRating = BuildChallengeRatingIndex(Monsters);
     }
 
     public string Version { get; }
@@ -34,7 +37,48 @@ public sealed class DataSnapshot
     public IReadOnlyDictionary<string, Spell> SpellsById { get; }
     public IReadOnlyDictionary<string, Monster> MonstersById { get; }
     public IReadOnlyDictionary<string, Source> SourcesById { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsByInitial { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsByInitial { get; }
+    public IReadOnlyDictionary<decimal, IReadOnlyList<Monster>> MonstersByChallengeRating { get; }
 
     private static IReadOnlyDictionary<string, T> ReadOnlyDictionary<T>(Dictionary<string, T> value) =>
         new ReadOnlyDictionary<string, T>(value);
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<T>> BuildInitialIndex<T>(
+        IEnumerable<T> items)
+        where T : notnull
+    {
+        var groups = items.GroupBy(
+                item => InitialBucket(item switch
+                {
+                    Feat feat => feat.Name,
+                    Spell spell => spell.Name,
+                    _ => throw new ArgumentException($"Unsupported index type: {typeof(T).Name}.")
+                }),
+                StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<T>)group.ToArray(),
+                StringComparer.OrdinalIgnoreCase);
+
+        return ReadOnlyDictionary(groups);
+    }
+
+    private static IReadOnlyDictionary<decimal, IReadOnlyList<Monster>> BuildChallengeRatingIndex(
+        IEnumerable<Monster> monsters) =>
+        new ReadOnlyDictionary<decimal, IReadOnlyList<Monster>>(monsters
+            .Where(monster => monster.ChallengeRating.HasValue)
+            .GroupBy(monster => monster.ChallengeRating!.Value)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<Monster>)group.ToArray()));
+
+    private static string InitialBucket(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "0-9";
+
+        var first = char.ToUpperInvariant(name[0]);
+        return first is >= 'A' and <= 'Z' ? first.ToString() : "0-9";
+    }
 }

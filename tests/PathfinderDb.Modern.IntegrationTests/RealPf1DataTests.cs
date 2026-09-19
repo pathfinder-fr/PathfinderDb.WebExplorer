@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using PathfinderDb.Data.Import;
+using System.Diagnostics;
 using Xunit;
 
 namespace PathfinderDb.Modern.IntegrationTests;
@@ -15,7 +16,10 @@ public sealed class RealPf1DataTests
         if (Skip.IfNot(Directory.Exists(root), $"The configured pf1-data clone does not exist: {root}")) return;
 
         var loader = new PathfinderDataLoader(Options.Create(new PathfinderDataOptions { RootPath = root }));
+        var stopwatch = Stopwatch.StartNew();
         var result = await loader.LoadAsync();
+        stopwatch.Stop();
+        Console.WriteLine($"pf1-data load and indexing: {stopwatch.Elapsed.TotalMilliseconds:0} ms");
 
         Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Validation.Errors));
         Assert.NotNull(result.Snapshot);
@@ -26,6 +30,8 @@ public sealed class RealPf1DataTests
         Assert.False(string.IsNullOrWhiteSpace(result.Version));
         Assert.True(result.Snapshot.Feats.Count > 100);
         Assert.True(result.Snapshot.Spells.Count > 100);
+        Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2),
+            $"Loading and indexing pf1-data took {stopwatch.Elapsed.TotalMilliseconds:0} ms.");
     }
 }
 
