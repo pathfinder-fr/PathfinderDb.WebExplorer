@@ -9,5 +9,20 @@
     <h1>@Model.Spell!.Name</h1>
     @if (!string.IsNullOrWhiteSpace(Model.Spell.School)) { <p><strong>École :</strong> @Model.Spell.School</p> }
     @if (Model.Spell.Levels.Count > 0) { <p><strong>Niveaux :</strong> @string.Join(", ", Model.Spell.Levels.Select(x => $"{x.List} {x.Level}"))</p> }
+    @if (Model.Spell.ComponentKinds.Count > 0) { <p><strong>Composantes :</strong> @string.Join(", ", Model.Spell.ComponentKinds)</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Spell.Range)) { <p><strong>Portée :</strong> @Model.Spell.Range</p> }
+    @if (!string.IsNullOrWhiteSpace(Model.Spell.Target)) { <p><strong>Cible :</strong> @Model.Spell.Target</p> }
+    @if (!string.IsNullOrWhiteSpace(Model.Spell.CastingTime)) { <p><strong>Temps d'incantation :</strong> @Model.Spell.CastingTime</p> }
+    @if (Model.Spell.Source is not null) { <p class="intro">Source : @Model.Spell.Source.Id</p> }
+    @if (Model.Spell.Localization.Count > 0)
+    {
+        <h2>Traductions</h2>
+        <dl>
+            @foreach (var localization in Model.Spell.Localization)
+            {
+                <dt>@localization.Key</dt>
+                <dd>@localization.Value</dd>
+            }
+        </dl>
+    }
 </article>

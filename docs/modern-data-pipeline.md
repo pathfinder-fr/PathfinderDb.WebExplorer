@@ -76,6 +76,11 @@ Type and source indexes are built in the immutable data snapshot, so these
 routes keep the same bounded 50-item pagination and 404 behavior as the
 existing catalog routes.
 
+Feat and spell detail pages now render the normalized fields available in the
+JSON exports, including prerequisite choices, normal text, source, spell
+components, target, casting time, and localization values. Missing optional
+fields remain omitted rather than rendered as empty placeholders.
+
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
 normalization, validation, version hashing, and snapshot index construction.

@@ -9,5 +9,17 @@
     <h1>@Model.Feat!.Name</h1>
     @if (Model.Feat.Types.Count > 0) { <p><strong>Types :</strong> @string.Join(", ", Model.Feat.Types)</p> }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Description)) { <p>@Model.Feat.Description</p> }
+    @if (Model.Feat.Prerequisites.Count > 0)
+    {
+        <h2>Pré-requis</h2>
+        <ul>
+            @foreach (var prerequisite in Model.Feat.Prerequisites)
+            {
+                <li>@CatalogText.FormatPrerequisite(prerequisite)</li>
+            }
+        </ul>
+    }
     @if (!string.IsNullOrWhiteSpace(Model.Feat.Benefit)) { <h2>Avantage</h2><p>@Model.Feat.Benefit</p> }
+    @if (!string.IsNullOrWhiteSpace(Model.Feat.Normal)) { <h2>Normal</h2><p>@Model.Feat.Normal</p> }
+    @if (Model.Feat.Source is not null) { <p class="intro">Source : @Model.Feat.Source.Id</p> }
 </article>
