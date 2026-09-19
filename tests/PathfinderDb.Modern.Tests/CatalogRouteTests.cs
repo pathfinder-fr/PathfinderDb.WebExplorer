@@ -34,7 +34,7 @@ public sealed class CatalogRouteTests
     }
 
     [Fact]
-    public void Catalog_selectors_share_the_three_column_grid()
+    public void Catalog_lists_share_one_three_column_style()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var stylesheet = File.ReadAllText(Path.Combine(
@@ -47,8 +47,10 @@ public sealed class CatalogRouteTests
             repositoryRoot,
             "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
 
-        Assert.Matches(@"\.bucket-nav\s*\{[^}]*grid-template-columns:\s*repeat\(3,", stylesheet);
-        Assert.DoesNotContain("class=\"catalog-list\"", monsters);
-        Assert.DoesNotContain("<ul class=\"bucket-nav\"", spells);
+        Assert.Matches(@"\.catalog-list\s*\{[^}]*grid-template-columns:\s*repeat\(3,", stylesheet);
+        Assert.Contains("min-height: 2.9rem", stylesheet);
+        Assert.DoesNotContain(".bucket-nav", stylesheet);
+        Assert.DoesNotContain("class=\"bucket-nav\"", monsters);
+        Assert.DoesNotContain("class=\"bucket-nav\"", spells);
     }
 }
