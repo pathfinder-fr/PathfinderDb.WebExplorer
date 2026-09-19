@@ -148,3 +148,27 @@ La vraie modernisation ne passera pas seulement par un redesign visuel : il faut
 - identifier les différences entre les XML actuels et le format de destination
 - définir l'architecture finale de l'application moderne
 - construire le premier import de données en environnement de test
+
+## Nouvelle application .NET 10
+
+La modernisation est développée en parallèle dans `src/PathfinderDb.Modern` afin
+de préserver l'application MVC 4 existante pendant la transition.
+
+La nouvelle application consomme exclusivement les trois exports JSON racine du
+clone externe `pf1-data` :
+
+- `feats.json`
+- `spells.json`
+- `monsters.json`
+
+Le chemin du clone est configuré par `PathfinderData:RootPath`, ou par la
+variable d'environnement `PathfinderData__RootPath`. En développement local,
+la valeur attendue est `D:\code\perso\pf\pf1-data`. Les fichiers JSON de
+production ne doivent pas être copiés dans ce dépôt.
+
+Commandes de validation de la fondation moderne :
+
+```powershell
+dotnet build src\PathfinderDb.Modern\PathfinderDb.Modern.sln --configuration Release
+dotnet test tests\PathfinderDb.Modern.Tests\PathfinderDb.Modern.Tests.csproj
+```
