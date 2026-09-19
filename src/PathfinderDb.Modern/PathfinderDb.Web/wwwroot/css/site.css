@@ -121,6 +121,16 @@ h2 { margin-top: 2rem; }
 }
 .catalog-list > a:hover,
 .catalog-list > li:hover { border-color: var(--accent); background: #fff; }
+.selection-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .2rem 1.25rem;
+    margin: .75rem 0 1.25rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+}
+.selection-list > li { width: max-content; max-width: 100%; }
+.selection-list a { color: var(--accent-dark); }
 .pagination {
     display: flex;
     align-items: center;

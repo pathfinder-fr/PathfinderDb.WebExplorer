@@ -10,21 +10,21 @@
     {
         <p class="intro">Choisissez une école, une classe, une source ou une initiale.</p>
         <h2>Par école</h2>
-        <nav class="catalog-list" aria-label="Écoles de magie">
-            @foreach (var school in Model.Schools) { <a href="/sorts/ecole/@school">@CatalogText.FormatSpellSchool(school)</a> }
-        </nav>
+        <ul class="selection-list" aria-label="Écoles de magie">
+            @foreach (var school in Model.Schools) { <li><a href="/sorts/ecole/@school">@CatalogText.FormatSpellSchool(school)</a></li> }
+        </ul>
         <h2>Par classe</h2>
-        <nav class="catalog-list" aria-label="Classes">
-            @foreach (var spellClass in Model.Classes) { <a href="/sorts/classe/@(spellClass)">@CatalogText.FormatSpellList(spellClass)</a> }
-        </nav>
+        <ul class="selection-list" aria-label="Classes">
+            @foreach (var spellClass in Model.Classes) { <li><a href="/sorts/classe/@(spellClass)">@CatalogText.FormatSpellList(spellClass)</a></li> }
+        </ul>
         <h2>Par source</h2>
-        <nav class="catalog-list" aria-label="Sources des sorts">
-            @foreach (var source in Model.Sources) { <a href="/sorts/source/@source">@CatalogText.FormatSource(source)</a> }
-        </nav>
+        <ul class="selection-list" aria-label="Sources des sorts">
+            @foreach (var source in Model.Sources) { <li><a href="/sorts/source/@source">@CatalogText.FormatSource(source)</a></li> }
+        </ul>
         <h2>Par ordre alphabétique</h2>
-        <nav class="catalog-list" aria-label="Initiales">
-            @foreach (var bucket in Model.Buckets) { <a href="/sorts/@bucket">@bucket</a> }
-        </nav>
+        <ul class="selection-list" aria-label="Initiales">
+            @foreach (var bucket in Model.Buckets) { <li><a href="/sorts/@bucket">@bucket</a></li> }
+        </ul>
     }
     else
     {

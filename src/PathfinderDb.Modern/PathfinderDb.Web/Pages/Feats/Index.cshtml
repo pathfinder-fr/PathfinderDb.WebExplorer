@@ -10,26 +10,26 @@
     {
         <p class="intro">Choisissez un critère pour trouver rapidement le don recherché.</p>
         <h2>Par type</h2>
-        <nav class="catalog-list" aria-label="Types de dons">
+        <ul class="selection-list" aria-label="Types de dons">
             @foreach (var type in Model.Types)
             {
-                <a href="/dons/type/@type">@CatalogText.FormatFeatType(type)</a>
+                <li><a href="/dons/type/@type">@CatalogText.FormatFeatType(type)</a></li>
             }
-        </nav>
+        </ul>
         <h2>Par source</h2>
-        <nav class="catalog-list" aria-label="Sources des dons">
+        <ul class="selection-list" aria-label="Sources des dons">
             @foreach (var source in Model.Sources)
             {
-                <a href="/dons/source/@source">@CatalogText.FormatSource(source)</a>
+                <li><a href="/dons/source/@source">@CatalogText.FormatSource(source)</a></li>
             }
-        </nav>
+        </ul>
         <h2>Par ordre alphabétique</h2>
-        <nav class="catalog-list" aria-label="Initiales">
+        <ul class="selection-list" aria-label="Initiales">
             @foreach (var bucket in Model.Buckets)
             {
-                <a href="/dons/@bucket">@bucket</a>
+                <li><a href="/dons/@bucket">@bucket</a></li>
             }
-        </nav>
+        </ul>
     }
     else
     {

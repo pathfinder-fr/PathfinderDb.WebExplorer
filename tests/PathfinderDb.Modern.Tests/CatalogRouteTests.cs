@@ -63,6 +63,20 @@ public sealed class CatalogRouteTests
     }
 
     [Fact]
+    public void Catalog_selection_menus_use_compact_bullet_lists()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var stylesheet = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+
+        Assert.Contains(".selection-list", stylesheet);
+        Assert.Contains("display: flex", stylesheet);
+        Assert.Contains("flex-wrap: wrap", stylesheet);
+        Assert.Contains("list-style: disc", stylesheet);
+    }
+
+    [Fact]
     public void Catalog_lists_share_one_three_column_style()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
