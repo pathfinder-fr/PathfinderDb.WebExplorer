@@ -172,3 +172,29 @@ Commandes de validation de la fondation moderne :
 dotnet build src\PathfinderDb.Modern\PathfinderDb.Modern.sln --configuration Release
 dotnet test tests\PathfinderDb.Modern.Tests\PathfinderDb.Modern.Tests.csproj
 ```
+
+Publication IIS de la nouvelle application :
+
+```powershell
+.\scripts\publish-modern.ps1
+```
+
+Par défaut, le script publie en `Release`, en mode framework-dependent, dans
+`.\publish\PathfinderDb.Web` (dossier ignoré par Git). Le serveur IIS doit
+disposer de l'Hosting Bundle .NET 10 et le pool d'application doit être
+configuré avec **No Managed Code**. Le chemin de données reste externe au
+dossier publié et doit être fourni à IIS via la variable
+`PathfinderData__RootPath`.
+
+Options utiles :
+
+```powershell
+# Choisir un autre dossier de publication
+.\scripts\publish-modern.ps1 -OutputPath D:\Sites\PathfinderDb.Web
+
+# Publier pour un runtime Windows autonome
+.\scripts\publish-modern.ps1 -Runtime win-x64 -SelfContained
+```
+
+Le script recrée uniquement le dossier de sortie ciblé, vérifie la présence de
+`web.config` généré pour IIS et n'embarque pas le clone `pf1-data`.
