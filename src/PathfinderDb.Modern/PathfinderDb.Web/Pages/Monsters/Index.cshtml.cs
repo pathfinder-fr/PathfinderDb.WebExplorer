@@ -9,6 +9,8 @@ namespace PathfinderDb.Web.Pages.Monsters;
 public sealed class IndexModel(CatalogService catalogs) : PageModel
 {
     public IReadOnlyList<decimal> ChallengeRatings => catalogs.MonsterBuckets;
+    public IReadOnlyList<string> Types => catalogs.MonsterTypeBuckets;
+    public IReadOnlyList<string> Sources => catalogs.MonsterSourceBuckets;
 
 public IActionResult OnGet()
 {

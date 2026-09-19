@@ -1,0 +1,21 @@
+@page "/monstres/type/{type}"
+@model PathfinderDb.Web.Pages.Monsters.ByTypeModel
+@{
+    ViewData["Title"] = $"Monstres de type {Model.CatalogPage!.Bucket}";
+}
+<section class="page-card">
+    <p><a href="/monstres">← Tous les monstres</a></p>
+    <p class="eyebrow">Catalogue par type</p>
+    <h1>Monstres de type @Model.CatalogPage!.Bucket</h1>
+    <ol class="catalog-list">
+        @foreach (var monster in Model.CatalogPage.Items)
+        {
+            <li><a href="/monstres/@monster.Id">@monster.Name</a></li>
+        }
+    </ol>
+    <nav class="pagination" aria-label="Pagination">
+        @if (Model.CatalogPage.HasPreviousPage) { <a href="/monstres/type/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }
+        <span>Page @Model.CatalogPage.Page / @Model.CatalogPage.PageCount</span>
+        @if (Model.CatalogPage.HasNextPage) { <a href="/monstres/type/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page + 1)">Suivant</a> }
+    </nav>
+</section>

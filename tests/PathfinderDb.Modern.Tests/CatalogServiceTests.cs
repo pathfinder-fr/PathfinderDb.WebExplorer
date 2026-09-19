@@ -35,6 +35,29 @@ public sealed class CatalogServiceTests
         Assert.Null(service.GetFeats("A", 2));
     }
 
+    [Fact]
+    public void Monster_catalog_supports_type_and_source_buckets()
+    {
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [],
+            [],
+            [
+                new Monster("wolf", "Wolf", 1, null, null, "Animal", new Source("Bestiary", [])),
+                new Monster("goblin", "Goblin", 1, null, null, "Humanoid", new Source("Bestiary", [])),
+                new Monster("dragon", "Dragon", 10, null, null, "Dragon", new Source("Advanced", []))
+            ],
+            [],
+            "version")));
+
+        var byType = service.GetMonstersByType("animal");
+        var bySource = service.GetMonstersBySource("Bestiary");
+
+        Assert.Single(byType!.Items);
+        Assert.Equal("Animal", byType.Bucket);
+        Assert.Equal(2, bySource!.TotalCount);
+        Assert.Equal(["Advanced", "Bestiary"], service.MonsterSourceBuckets);
+    }
+
     private sealed class TestProvider(DataSnapshot snapshot) : IDataSnapshotProvider
     {
         public DataSnapshot? Current => snapshot;

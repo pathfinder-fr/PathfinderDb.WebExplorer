@@ -66,6 +66,16 @@ styles, accessible navigation labels, and compact catalogue/detail components.
 The visual layer is kept static and server-rendered so it does not add a
 client-side framework or reduce CDN cacheability.
 
+Monster navigation is available by challenge rating, type, and source:
+
+* `/monstres/cr/{challengeRating}`
+* `/monstres/type/{type}`
+* `/monstres/source/{source}`
+
+Type and source indexes are built in the immutable data snapshot, so these
+routes keep the same bounded 50-item pagination and 404 behavior as the
+existing catalog routes.
+
 The current real-clone load and index benchmark must remain below 2 seconds.
 The benchmark is covered by `RealPf1DataTests` and includes JSON deserialization,
 normalization, validation, version hashing, and snapshot index construction.

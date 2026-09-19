@@ -22,6 +22,12 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
         return GetPage(provider.Current?.MonstersByChallengeRating, cr, page);
     }
 
+    public CatalogPage<Monster>? GetMonstersByType(string? type, int page = 1) =>
+        GetPage(provider.Current?.MonstersByType, NormalizeBucket(type), page);
+
+    public CatalogPage<Monster>? GetMonstersBySource(string? source, int page = 1) =>
+        GetPage(provider.Current?.MonstersBySource, NormalizeBucket(source), page);
+
     public Feat? GetFeat(string slug) => provider.Current?.FeatsById.GetValueOrDefault(slug);
     public Spell? GetSpell(string slug) => provider.Current?.SpellsById.GetValueOrDefault(slug);
     public Monster? GetMonster(string slug) => provider.Current?.MonstersById.GetValueOrDefault(slug);
@@ -35,13 +41,33 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
     public IReadOnlyList<decimal> MonsterBuckets =>
         provider.Current?.MonstersByChallengeRating.Keys.OrderBy(x => x).ToArray() ?? [];
 
+    public IReadOnlyList<string> MonsterTypeBuckets =>
+        provider.Current?.MonstersByType.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<string> MonsterSourceBuckets =>
+        provider.Current?.MonstersBySource.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
     private static CatalogPage<T>? GetPage<T, TKey>(
         IReadOnlyDictionary<TKey, IReadOnlyList<T>>? buckets,
         TKey bucket,
         int page)
         where TKey : notnull
     {
-        if (buckets is null || page < 1 || !buckets.TryGetValue(bucket, out var items))
+        if (buckets is null || page < 1)
+            return null;
+
+        if (bucket is string requestedBucket)
+        {
+            var canonicalBucket = buckets.Keys
+                .FirstOrDefault(key => key is string value &&
+                    string.Equals(value, requestedBucket, StringComparison.OrdinalIgnoreCase));
+            if (canonicalBucket is null)
+                return null;
+
+            bucket = canonicalBucket;
+        }
+
+        if (!buckets.TryGetValue(bucket, out var items))
             return null;
 
         var pageCount = Math.Max(1, (items.Count + PageSize - 1) / PageSize);
@@ -62,4 +88,6 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
             : initial.Trim().Equals("0-9", StringComparison.OrdinalIgnoreCase)
                 ? "0-9"
                 : initial.Trim().ToUpperInvariant();
+
+    private static string NormalizeBucket(string? bucket) => bucket?.Trim() ?? string.Empty;
 }

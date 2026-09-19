@@ -25,6 +25,8 @@ public sealed class DataSnapshot
         FeatsByInitial = BuildInitialIndex(Feats);
         SpellsByInitial = BuildInitialIndex(Spells);
         MonstersByChallengeRating = BuildChallengeRatingIndex(Monsters);
+        MonstersByType = BuildMonsterStringIndex(Monsters, monster => monster.Type);
+        MonstersBySource = BuildMonsterStringIndex(Monsters, monster => monster.Source?.Id);
     }
 
     public string Version { get; }
@@ -40,6 +42,8 @@ public sealed class DataSnapshot
     public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsByInitial { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsByInitial { get; }
     public IReadOnlyDictionary<decimal, IReadOnlyList<Monster>> MonstersByChallengeRating { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersByType { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersBySource { get; }
 
     private static IReadOnlyDictionary<string, T> ReadOnlyDictionary<T>(Dictionary<string, T> value) =>
         new ReadOnlyDictionary<string, T>(value);
@@ -72,6 +76,18 @@ public sealed class DataSnapshot
             .ToDictionary(
                 group => group.Key,
                 group => (IReadOnlyList<Monster>)group.ToArray()));
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<Monster>> BuildMonsterStringIndex(
+        IEnumerable<Monster> monsters,
+        Func<Monster, string?> selector) =>
+        new ReadOnlyDictionary<string, IReadOnlyList<Monster>>(monsters
+            .Select(monster => (Monster: monster, Key: selector(monster)))
+            .Where(value => !string.IsNullOrWhiteSpace(value.Key))
+            .GroupBy(value => value.Key!, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<Monster>)group.Select(value => value.Monster).ToArray(),
+                StringComparer.OrdinalIgnoreCase));
 
     private static string InitialBucket(string name)
     {
