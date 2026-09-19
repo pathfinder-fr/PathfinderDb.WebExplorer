@@ -54,4 +54,18 @@ public sealed class CatalogRouteTests
         Assert.DoesNotContain("class=\"bucket-nav\"", monsters);
         Assert.DoesNotContain("class=\"bucket-nav\"", spells);
     }
+
+    [Fact]
+    public void Header_uses_white_brand_surface_with_brown_rules()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var stylesheet = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+
+        Assert.Matches(@"\.site-header\s*\{[^}]*background:\s*#fff", stylesheet);
+        Assert.Contains("border-top: 2px solid var(--accent-dark)", stylesheet);
+        Assert.Contains("border-bottom: 2px solid var(--accent-dark)", stylesheet);
+        Assert.Contains(".main-nav a {\r\n    color: var(--accent-dark);", stylesheet);
+    }
 }

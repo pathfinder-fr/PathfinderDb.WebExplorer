@@ -28,9 +28,11 @@ a:focus-visible {
 }
 .shell { width: min(100% - 2rem, 72rem); margin-inline: auto; }
 .site-header {
-    color: #fff;
-    background: linear-gradient(120deg, #4b3023, #7e4a32);
-    box-shadow: 0 2px 12px rgba(71, 48, 31, .25);
+    color: var(--ink);
+    background: #fff;
+    border-top: 2px solid var(--accent-dark);
+    border-bottom: 2px solid var(--accent-dark);
+    box-shadow: 0 2px 8px rgba(71, 48, 31, .12);
 }
 .header-inner {
     display: flex;
@@ -43,12 +45,12 @@ a:focus-visible {
 .brand img { display: block; width: min(14rem, 60vw); height: auto; }
 .main-nav { display: flex; flex-wrap: wrap; gap: .35rem; }
 .main-nav a {
-    color: #e8eef2;
+    color: var(--accent-dark);
     padding: .45rem .75rem;
     border-radius: .5rem;
     text-decoration: none;
 }
-.main-nav a:hover { color: #fff; background: rgba(255,255,255,.12); }
+.main-nav a:hover { color: var(--accent-dark); background: var(--surface-alt); }
 .page-content { min-height: calc(100vh - 8rem); padding-block: 2rem 3rem; }
 .page-card {
     padding: clamp(1.25rem, 3vw, 2.5rem);
