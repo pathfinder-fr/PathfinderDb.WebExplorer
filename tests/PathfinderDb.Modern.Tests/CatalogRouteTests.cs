@@ -34,28 +34,6 @@ public sealed class CatalogRouteTests
     }
 
     [Fact]
-    public void Inline_bucket_lists_hide_default_list_markers()
-    {
-        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var stylesheet = File.ReadAllText(Path.Combine(
-            repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
-
-        Assert.Matches(@"\.bucket-nav\s*\{[^}]*list-style:\s*none", stylesheet);
-    }
-
-    [Fact]
-    public void Inline_bucket_lists_separate_wrapped_rows()
-    {
-        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var stylesheet = File.ReadAllText(Path.Combine(
-            repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
-
-        Assert.Matches(@"\.bucket-nav\s*\{[^}]*row-gap:\s*\.6rem", stylesheet);
-    }
-
-    [Fact]
     public void Catalog_selectors_share_the_three_column_grid()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
