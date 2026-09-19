@@ -8,19 +8,19 @@
     <h1>Dons</h1>
     <p class="intro">Choisissez un critère pour trouver rapidement le don recherché.</p>
     <h2>Par type</h2>
-    <ul class="bucket-nav" aria-label="Types de dons">
+    <nav class="bucket-nav" aria-label="Types de dons">
         @foreach (var type in Model.Types)
         {
-            <li><a href="/dons/type/@type">@type</a></li>
+            <a href="/dons/type/@type">@type</a>
         }
-    </ul>
+    </nav>
     <h2>Par source</h2>
-    <ul class="bucket-nav" aria-label="Sources des dons">
+    <nav class="bucket-nav" aria-label="Sources des dons">
         @foreach (var source in Model.Sources)
         {
-            <li><a href="/dons/source/@source">@source</a></li>
+            <a href="/dons/source/@source">@source</a>
         }
-    </ul>
+    </nav>
     <h2>Par ordre alphabétique</h2>
     <nav class="bucket-nav" aria-label="Initiales">
         @foreach (var bucket in Model.Buckets)

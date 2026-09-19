@@ -54,4 +54,23 @@ public sealed class CatalogRouteTests
 
         Assert.Matches(@"\.bucket-nav\s*\{[^}]*row-gap:\s*\.6rem", stylesheet);
     }
+
+    [Fact]
+    public void Catalog_selectors_share_the_three_column_grid()
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var stylesheet = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+        var monsters = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
+        var spells = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
+
+        Assert.Matches(@"\.bucket-nav\s*\{[^}]*grid-template-columns:\s*repeat\(3,", stylesheet);
+        Assert.DoesNotContain("class=\"catalog-list\"", monsters);
+        Assert.DoesNotContain("<ul class=\"bucket-nav\"", spells);
+    }
 }
