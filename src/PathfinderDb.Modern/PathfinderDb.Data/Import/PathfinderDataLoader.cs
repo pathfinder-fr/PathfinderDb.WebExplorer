@@ -134,12 +134,23 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
         {
             var id = Required(x.Id, $"spells[{i}].Id", validation);
             var name = Required(x.Name, $"spells[{i}].Name", validation);
-            var levels = (x.Levels ?? []).Select((level, j) =>
+            var sourceLevels = x.Levels ?? [];
+            var levels = new List<SpellLevel>(sourceLevels.Count);
+            for (var j = 0; j < sourceLevels.Count; j++)
             {
+                var level = sourceLevels[j];
                 var list = Required(level.List, $"spells[{i}].Levels[{j}].List", validation);
                 if (level.Level is null or < 0) validation.Warnings.Add($"spells[{i}].Levels[{j}].Level is missing or negative.");
-                return new SpellLevel(list, Math.Max(0, level.Level ?? 0));
-            }).ToArray();
+                if (level.Level is null)
+                {
+                    levels.Add(new SpellLevel(list, 0));
+                    continue;
+                }
+                if (level.Level < 0)
+                    continue;
+
+                levels.Add(new SpellLevel(list, level.Level.Value));
+            }
             return new Spell(id, name, x.School, levels, SplitKinds(x.Components?.Kinds),
                 x.Range?.SpecificValue ?? JsonValue(x.Range?.Value), JsonValue(x.Target?.Value), JsonValue(x.CastingTime?.Value),
                 MapSource(x.Source, sources, $"spells[{i}].Source", validation), MapLocalization(x.Localization))

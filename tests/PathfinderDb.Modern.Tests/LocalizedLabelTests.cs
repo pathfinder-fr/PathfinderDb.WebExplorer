@@ -74,6 +74,33 @@ public sealed class LocalizedLabelTests
         }
     }
 
+    [Fact]
+    public async Task Loader_does_not_publish_negative_spell_levels_in_the_level_zero_bucket()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"pathfinder-negative-level-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            await File.WriteAllTextAsync(Path.Combine(root, "feats.json"), """{"Sources":[],"Feats":[]}""");
+            await File.WriteAllTextAsync(Path.Combine(root, "spells.json"),
+                """{"Sources":[],"Spells":[{"Id":"negative","Name":"Negative","Levels":[{"List":"wizard","Level":-1}]},{"Id":"cantrip","Name":"Cantrip","Levels":[{"List":"wizard","Level":0}]}]}""");
+            await File.WriteAllTextAsync(Path.Combine(root, "monsters.json"), """{"Sources":[],"Monsters":[]}""");
+
+            var result = await new PathfinderDataLoader(Options.Create(new PathfinderDataOptions
+            {
+                RootPath = root
+            })).LoadAsync();
+
+            Assert.True(result.IsSuccess, string.Join(" | ", result.Validation.Errors));
+            Assert.Equal(["cantrip"], result.Snapshot!.SpellsByLevel[0].Select(spell => spell.Id));
+            Assert.Contains(result.Validation.Warnings, warning => warning.Contains("negative", StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
     private sealed class FixedSnapshotProvider(DataSnapshot snapshot) : IDataSnapshotProvider
     {
         public DataSnapshot? Current => snapshot;
