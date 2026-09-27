@@ -132,7 +132,6 @@ h2 { margin-top: 2rem; }
 .catalog-summary-details strong {
     color: var(--ink);
 }
-.catalog-list > li:hover { border-color: var(--accent); }
 .selection-list {
     display: flex;
     flex-wrap: wrap;
