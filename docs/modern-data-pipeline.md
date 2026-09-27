@@ -77,10 +77,13 @@ The visual layer is kept static and server-rendered so it does not add a
 client-side framework or reduce CDN cacheability.
 
 The homepage is reader-first: it presents direct entry points for dons, sorts,
-and monstres before the technical snapshot status. The shared shell uses the
-legacy `pf-fr-db.png` logo on a warm parchment/ivory palette with serif
-headings; the logo is copied into the modern static assets but the legacy
-application remains unchanged.
+and monstres before a compact technical footer. The footer shows the data
+version when available and keeps loading warnings or unavailable-state errors
+visible. The shared header identifies the content as Pathfinder première
+édition and shows catalog counts only while the data snapshot is ready. The
+shared shell uses the legacy `pf-fr-db.png` logo on a warm parchment/ivory
+palette with serif headings; the logo is copied into the modern static assets
+but the legacy application remains unchanged.
 
 The `/dons` and `/sorts` pages are selectors and no longer open an arbitrary
 first alphabetical bucket. They expose the following deterministic, paginated
@@ -91,13 +94,14 @@ catalog routes:
 * `/sorts/ecole/{school}`
 * `/sorts/classe/{class}`
 * `/sorts/source/{source}`
+* `/sorts/niveau/{level}`
 
 Each route uses the immutable snapshot indexes, keeps the fixed 50-item page
 size, preserves the existing cache headers and output-cache policy, and returns
 404 for an unknown bucket or page. Spell classes/lists, schools, feat types,
-and sources are discovered from the loaded JSON rather than maintained as a
-hard-coded enumeration; this keeps values such as `psychiste` available when
-present in the data.
+sources, and non-negative numeric spell levels are discovered from the loaded
+JSON rather than maintained as a hard-coded enumeration; this keeps values
+such as `psychiste` available when present in the data.
 
 Monster navigation is available alphabetically, by challenge rating, type, and
 source. Alphabetical pages use the same deterministic bucket and pagination
@@ -117,13 +121,18 @@ to avoid ambiguity with the optional alphabetical route.
 Feat and spell detail pages now render the normalized fields available in the
 JSON exports, including prerequisite choices, normal text, source, spell
 components, target, casting time, and localization values. Missing optional
-fields remain omitted rather than rendered as empty placeholders.
+fields remain omitted rather than rendered as empty placeholders. Catalog
+result pages use compact, type-specific summaries for feats, spells, and
+monsters, with links from each item name to its complete detail page; monster
+summaries do not imply that a full stat block is available in the export.
 
-Item-level origin references are preserved for feats and spells. Their detail
-pages expose the URLs supplied by the export, such as the Pathfinder-fr.org
-Wiki and DRP Black-Book-Éditions pages, without reconstructing URLs from names.
-The current monster exports contain no item-level origin references, so monster
-pages intentionally do not display invented per-creature links.
+Item-level origin references are preserved for feats and spells, but the
+presentation layer links only to absolute HTTP(S) URLs hosted on
+`pathfinder-fr.org` or one of its subdomains. It uses the URL supplied by the
+export without reconstructing it; Paizo, DRP Black-Book-Éditions, malformed,
+relative, and other external references are not displayed. The current monster
+exports contain no item-level origin references, so monster pages
+intentionally do not display invented per-creature links.
 
 Technical category values remain canonical in the snapshot and URLs, but the
 Razor presentation layer translates them for readers through the generated
