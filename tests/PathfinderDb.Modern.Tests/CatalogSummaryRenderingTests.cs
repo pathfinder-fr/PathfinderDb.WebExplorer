@@ -38,7 +38,7 @@ public sealed class CatalogSummaryRenderingTests
     }
 
     [Fact]
-    public void Feat_summary_includes_types_prerequisites_source_and_detail_link()
+    public void Feat_summary_is_compact_and_keeps_gameplay_fields_and_detail_link()
     {
         var partial = ReadPartial("_FeatCatalogItem.cshtml");
 
@@ -46,11 +46,12 @@ public sealed class CatalogSummaryRenderingTests
         Assert.Contains("Types", partial);
         Assert.Contains("FormatPrerequisite", partial);
         Assert.Contains("FormatSource", partial);
-        Assert.Contains("@if", partial);
+        Assert.Contains("catalog-summary-details", partial);
+        Assert.DoesNotContain("Wiki Pathfinder-fr.org", partial);
     }
 
     [Fact]
-    public void Spell_summary_includes_key_fields_and_original_name_label()
+    public void Spell_summary_is_compact_and_hides_wiki_and_original_name()
     {
         var partial = ReadPartial("_SpellCatalogItem.cshtml");
 
@@ -58,15 +59,17 @@ public sealed class CatalogSummaryRenderingTests
         Assert.Contains("FormatSpellSchool", partial);
         Assert.Contains("FormatSpellList", partial);
         Assert.Contains("FormatSpellComponent", partial);
-        Assert.Contains("Portée", partial);
-        Assert.Contains("Cible", partial);
-        Assert.Contains("Temps d'incantation", partial);
-        Assert.Contains("Nom VO", partial);
-        Assert.Contains("en-US:name", partial);
+        Assert.DoesNotContain("Model.Range", partial);
+        Assert.DoesNotContain("Model.Target", partial);
+        Assert.DoesNotContain("Model.CastingTime", partial);
+        Assert.Contains("catalog-summary-details", partial);
+        Assert.DoesNotContain("Nom VO", partial);
+        Assert.DoesNotContain("en-US:name", partial);
+        Assert.DoesNotContain("Wiki Pathfinder-fr.org", partial);
     }
 
     [Fact]
-    public void Monster_summary_includes_catalog_fields_and_detail_link()
+    public void Monster_summary_is_compact_and_keeps_catalog_fields_and_detail_link()
     {
         var partial = ReadPartial("_MonsterCatalogItem.cshtml");
 
@@ -76,6 +79,7 @@ public sealed class CatalogSummaryRenderingTests
         Assert.Contains("Environnement", partial);
         Assert.Contains("Climat", partial);
         Assert.Contains("FormatSource", partial);
+        Assert.Contains("catalog-summary-details", partial);
     }
 
     private static string ReadPage(string relativePage) =>

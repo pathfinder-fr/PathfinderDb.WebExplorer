@@ -37,20 +37,25 @@ public sealed class HomepageRenderingTests
     }
 
     [Fact]
-    public void Shared_header_shows_catalog_counts_only_for_ready_data()
+    public void Homepage_portal_cards_show_catalog_counts_only_for_ready_data()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var layout = File.ReadAllText(Path.Combine(
             repositoryRoot,
             "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Shared", "_Layout.cshtml"));
+        var homepage = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Index.cshtml"));
 
         Assert.Contains("Pathfinder première édition", layout);
-        Assert.Contains("DataLoadState.Ready", layout);
-        Assert.Contains("catalogStatus.FeatCount", layout);
-        Assert.Contains("catalogStatus.SpellCount", layout);
-        Assert.Contains("catalogStatus.MonsterCount", layout);
-        Assert.DoesNotContain("Dons@if", layout);
-        Assert.DoesNotContain("Sorts@if", layout);
-        Assert.DoesNotContain("Monstres@if", layout);
+        Assert.DoesNotContain("catalogStatus", layout);
+        Assert.Contains("DataLoadState.Ready", homepage);
+        Assert.Contains("Model.Status.FeatCount", homepage);
+        Assert.Contains("Model.Status.SpellCount", homepage);
+        Assert.Contains("Model.Status.MonsterCount", homepage);
+        Assert.Contains("class=\"portal-card\"", homepage);
+        Assert.DoesNotContain("Dons @if", homepage);
+        Assert.DoesNotContain("Sorts @if", homepage);
+        Assert.DoesNotContain("Monstres @if", homepage);
     }
 }

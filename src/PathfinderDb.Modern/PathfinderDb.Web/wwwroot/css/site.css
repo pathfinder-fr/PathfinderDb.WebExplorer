@@ -52,7 +52,6 @@ a:focus-visible {
     text-decoration: none;
 }
 .main-nav a:hover { color: var(--accent-dark); background: var(--surface-alt); }
-.nav-count { margin-left: .3rem; color: var(--muted); font-size: .85em; }
 .page-content { min-height: calc(100vh - 8rem); padding-block: 2rem 3rem; }
 .page-card {
     padding: clamp(1.25rem, 3vw, 2.5rem);
@@ -94,6 +93,7 @@ h2 { margin-top: 2rem; }
     box-shadow: 0 5px 16px rgba(71, 48, 31, .08);
 }
 .portal-card strong { color: var(--accent-dark); font: 1.5rem var(--heading-font); }
+.portal-card .portal-count { color: var(--muted); font: 1rem system-ui, -apple-system, "Segoe UI", sans-serif; }
 .portal-card span { color: var(--muted); }
 .portal-card:hover { border-color: var(--gold); transform: translateY(-2px); }
 .homepage-technical-status {
@@ -106,31 +106,33 @@ h2 { margin-top: 2rem; }
 .catalog-list {
     display: grid;
     grid-template-columns: 1fr;
-    gap: .75rem;
-    margin: 1.5rem 0;
+    gap: .35rem;
+    margin: .85rem 0;
     padding: 0;
     list-style: none;
 }
 .catalog-list > li {
-    border: 1px solid var(--line);
-    border-radius: .6rem;
-    background: var(--surface-alt);
+    border-bottom: 1px solid var(--line);
 }
 .catalog-item article {
-    padding: 1rem 1.2rem;
+    padding: .35rem .55rem;
 }
 .catalog-item h3 {
-    margin: 0;
-    font-size: 1.25rem;
+    margin: 0 0 .1rem;
+    font-size: 1.05rem;
 }
-.catalog-item p {
-    margin: .45rem 0 0;
+.catalog-summary-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .05rem .75rem;
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.25;
 }
-.catalog-item .reference-links a {
-    display: inline-block;
-    text-decoration: none;
+.catalog-summary-details strong {
+    color: var(--ink);
 }
-.catalog-list > li:hover { border-color: var(--accent); background: #fff; }
+.catalog-list > li:hover { border-color: var(--accent); }
 .selection-list {
     display: flex;
     flex-wrap: wrap;

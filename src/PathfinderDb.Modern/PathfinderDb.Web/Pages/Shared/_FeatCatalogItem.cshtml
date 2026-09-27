@@ -2,24 +2,19 @@
 <li class="catalog-item">
     <article>
         <h3><a href="/dons/detail/@Model.Id">@Model.Name</a></h3>
+        <div class="catalog-summary-details">
         @if (Model.Types.Count > 0)
         {
-            <p><strong>Types :</strong> @string.Join(", ", Model.Types.Select(CatalogText.FormatFeatType))</p>
+            <span><strong>Types :</strong> @string.Join(", ", Model.Types.Select(CatalogText.FormatFeatType))</span>
         }
         @if (Model.Prerequisites.Count > 0)
         {
-            <p><strong>Pré-requis :</strong> @string.Join(" ; ", Model.Prerequisites.Select(CatalogText.FormatPrerequisite))</p>
+            <span><strong>Pré-requis :</strong> @string.Join(" ; ", Model.Prerequisites.Select(CatalogText.FormatPrerequisite))</span>
         }
-        @if (Model.Source is not null)
+        @if (!string.IsNullOrWhiteSpace(Model.Source?.Id))
         {
-            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+            <span><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</span>
         }
-        @foreach (var reference in Model.References.Where(CatalogText.IsPathfinderWikiReference))
-        {
-            var referenceUrl = reference.HrefString ?? reference.Href;
-            <p class="reference-links">
-                <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">Wiki Pathfinder-fr.org</a>
-            </p>
-        }
+        </div>
     </article>
 </li>

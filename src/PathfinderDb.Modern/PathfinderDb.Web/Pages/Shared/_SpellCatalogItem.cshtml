@@ -1,49 +1,24 @@
 @model PathfinderDb.Data.Domain.Spell
-@{
-    var originalName = Model.Localization.FirstOrDefault(localization =>
-        string.Equals(localization.Key, "en-US:name", StringComparison.OrdinalIgnoreCase)).Value;
-}
 <li class="catalog-item">
     <article>
         <h3><a href="/sorts/detail/@Model.Id">@Model.Name</a></h3>
+        <div class="catalog-summary-details">
         @if (!string.IsNullOrWhiteSpace(Model.School))
         {
-            <p><strong>École :</strong> @CatalogText.FormatSpellSchool(Model.School)</p>
+            <span><strong>École :</strong> @CatalogText.FormatSpellSchool(Model.School)</span>
         }
         @if (Model.Levels.Count > 0)
         {
-            <p><strong>Niveaux :</strong> @string.Join(", ", Model.Levels.Select(level => $"{CatalogText.FormatSpellList(level.List)} {level.Level}"))</p>
+            <span><strong>Niveaux :</strong> @string.Join(", ", Model.Levels.Select(level => $"{CatalogText.FormatSpellList(level.List)} {level.Level}"))</span>
         }
         @if (Model.ComponentKinds.Count > 0)
         {
-            <p><strong>Composantes :</strong> @string.Join(", ", Model.ComponentKinds.Select(CatalogText.FormatSpellComponent))</p>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Range))
-        {
-            <p><strong>Portée :</strong> @Model.Range</p>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.Target))
-        {
-            <p><strong>Cible :</strong> @Model.Target</p>
-        }
-        @if (!string.IsNullOrWhiteSpace(Model.CastingTime))
-        {
-            <p><strong>Temps d'incantation :</strong> @Model.CastingTime</p>
+            <span><strong>Composantes :</strong> @string.Join(", ", Model.ComponentKinds.Select(CatalogText.FormatSpellComponent))</span>
         }
         @if (!string.IsNullOrWhiteSpace(Model.Source?.Id))
         {
-            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+            <span><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</span>
         }
-        @if (!string.IsNullOrWhiteSpace(originalName))
-        {
-            <p><strong>Nom VO :</strong> @originalName</p>
-        }
-        @foreach (var reference in Model.References.Where(CatalogText.IsPathfinderWikiReference))
-        {
-            var referenceUrl = reference.HrefString ?? reference.Href;
-            <p class="reference-links">
-                <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">Wiki Pathfinder-fr.org</a>
-            </p>
-        }
+        </div>
     </article>
 </li>

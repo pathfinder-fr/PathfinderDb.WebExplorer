@@ -10,15 +10,33 @@
     <p class="intro">Trouvez rapidement un don, un sort ou un monstre pour préparer vos parties.</p>
     <div class="portal-grid">
         <a class="portal-card" href="/dons">
-            <strong>Dons</strong>
+            <strong>
+                Dons
+                @if (Model.Status.State == PathfinderDb.Data.Runtime.DataLoadState.Ready)
+                {
+                    <span class="portal-count">(@Model.Status.FeatCount)</span>
+                }
+            </strong>
             <span>Talents, prérequis et avantages</span>
         </a>
         <a class="portal-card" href="/sorts">
-            <strong>Sorts</strong>
+            <strong>
+                Sorts
+                @if (Model.Status.State == PathfinderDb.Data.Runtime.DataLoadState.Ready)
+                {
+                    <span class="portal-count">(@Model.Status.SpellCount)</span>
+                }
+            </strong>
             <span>Écoles, classes et composantes</span>
         </a>
         <a class="portal-card" href="/monstres">
-            <strong>Monstres</strong>
+            <strong>
+                Monstres
+                @if (Model.Status.State == PathfinderDb.Data.Runtime.DataLoadState.Ready)
+                {
+                    <span class="portal-count">(@Model.Status.MonsterCount)</span>
+                }
+            </strong>
             <span>CR, types et sources</span>
         </a>
     </div>

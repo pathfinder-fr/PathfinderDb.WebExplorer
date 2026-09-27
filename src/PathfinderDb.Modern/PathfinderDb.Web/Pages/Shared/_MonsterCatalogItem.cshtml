@@ -2,25 +2,27 @@
 <li class="catalog-item">
     <article>
         <h3><a href="/monstres/detail/@Model.Id">@Model.Name</a></h3>
+        <div class="catalog-summary-details">
         @if (Model.ChallengeRating is { } challengeRating)
         {
-            <p><strong>FP :</strong> @CatalogText.FormatChallengeRating(challengeRating)</p>
+            <span><strong>FP :</strong> @CatalogText.FormatChallengeRating(challengeRating)</span>
         }
         @if (!string.IsNullOrWhiteSpace(Model.Type))
         {
-            <p><strong>Type :</strong> @CatalogText.FormatMonsterType(Model.Type)</p>
+            <span><strong>Type :</strong> @CatalogText.FormatMonsterType(Model.Type)</span>
         }
         @if (!string.IsNullOrWhiteSpace(Model.Climate))
         {
-            <p><strong>Climat :</strong> @CatalogText.FormatCreatureClimate(Model.Climate)</p>
+            <span><strong>Climat :</strong> @CatalogText.FormatCreatureClimate(Model.Climate)</span>
         }
         @if (!string.IsNullOrWhiteSpace(Model.Environment))
         {
-            <p><strong>Environnement :</strong> @CatalogText.FormatCreatureEnvironment(Model.Environment)</p>
+            <span><strong>Environnement :</strong> @CatalogText.FormatCreatureEnvironment(Model.Environment)</span>
         }
         @if (!string.IsNullOrWhiteSpace(Model.Source?.Id))
         {
-            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+            <span><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</span>
         }
+        </div>
     </article>
 </li>

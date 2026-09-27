@@ -1,8 +1,3 @@
-@using PathfinderDb.Data.Runtime
-@inject IDataSnapshotProvider SnapshotProvider
-@{
-    var catalogStatus = SnapshotProvider.Status;
-}
 <!doctype html>
 <html lang="fr">
 <head>
@@ -19,27 +14,9 @@
                 <span class="edition-label">Pathfinder première édition</span>
             </a>
             <nav class="main-nav" aria-label="Navigation principale">
-                <a href="/dons">
-                    Dons
-                    @if (catalogStatus.State == DataLoadState.Ready)
-                    {
-                        <span class="nav-count">@catalogStatus.FeatCount</span>
-                    }
-                </a>
-                <a href="/sorts">
-                    Sorts
-                    @if (catalogStatus.State == DataLoadState.Ready)
-                    {
-                        <span class="nav-count">@catalogStatus.SpellCount</span>
-                    }
-                </a>
-                <a href="/monstres">
-                    Monstres
-                    @if (catalogStatus.State == DataLoadState.Ready)
-                    {
-                        <span class="nav-count">@catalogStatus.MonsterCount</span>
-                    }
-                </a>
+                <a href="/dons">Dons</a>
+                <a href="/sorts">Sorts</a>
+                <a href="/monstres">Monstres</a>
             </nav>
         </div>
     </header>
