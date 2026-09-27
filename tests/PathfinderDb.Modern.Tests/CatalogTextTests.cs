@@ -66,6 +66,7 @@ public sealed class CatalogTextTests
 
     [Theory]
     [InlineData("bard", "Barde")]
+    [InlineData("magus", "Magus")]
     [InlineData("sorcerer-wizard", "Ensorceleur / Magicien")]
     [InlineData("psychiste", "Psychiste")]
     [InlineData("unknown-class", "unknown-class")]

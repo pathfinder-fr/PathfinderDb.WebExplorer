@@ -40,6 +40,7 @@ public sealed class CatalogText(IDataSnapshotProvider? provider = null)
             ["antipaladin"] = "Antipaladin",
             ["inquisitor"] = "Inquisiteur",
             ["oracle"] = "Oracle",
+            ["magus"] = "Magus",
             ["summoner"] = "Conjurateur",
             ["summoner-unchained"] = "Conjurateur déchaîné",
             ["shaman"] = "Chaman",
