@@ -5,7 +5,7 @@
 }
 <section class="page-card">
     <img class="brand-mark" src="/images/pf-fr-db.png" alt="Pathfinder FR DB" />
-    <p class="eyebrow">Référence Pathfinder en français</p>
+    <p class="eyebrow">Fonds de Pathfinder première édition</p>
     <h1>Les règles à portée de dés</h1>
     <p class="intro">Trouvez rapidement un don, un sort ou un monstre pour préparer vos parties.</p>
     <div class="portal-grid">
@@ -23,24 +23,17 @@
         </a>
     </div>
 </section>
-<section class="technical-status page-card">
-    <p class="eyebrow">État du catalogue</p>
-    <h2>Informations techniques</h2>
-    <p>État des données : <strong>@Model.Status.State</strong></p>
+<footer class="homepage-technical-status">
     @if (Model.Status.Version is not null)
     {
-        <p>Version : <code>@Model.Status.Version</code></p>
-        <div class="detail-grid">
-            <div><dt>Dons</dt><dd>@Model.Status.FeatCount</dd></div>
-            <div><dt>Sorts</dt><dd>@Model.Status.SpellCount</dd></div>
-            <div><dt>Monstres</dt><dd>@Model.Status.MonsterCount</dd></div>
-        </div>
+        <p>Version des données : <code>@Model.Status.Version</code></p>
     }
-    <p>
-        Les données sont chargées depuis les exports publics de Pathfinder FR.
-    </p>
-    @if (Model.Status.Errors.Count > 0)
+    @if (Model.Status.Warnings.Count > 0)
+    {
+        <p role="status">Avertissements du catalogue : @string.Join(" ", Model.Status.Warnings)</p>
+    }
+    @if (Model.Status.State == PathfinderDb.Data.Runtime.DataLoadState.Unavailable)
     {
         <p role="alert">Le catalogue est indisponible : @string.Join(" ", Model.Status.Errors)</p>
     }
-</section>
+</footer>

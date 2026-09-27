@@ -64,6 +64,22 @@ public sealed class CatalogRouteTests
         }
     }
 
+    [Theory]
+    [InlineData("Feats/Index.cshtml", "← Tous les dons")]
+    [InlineData("Spells/Index.cshtml", "← Tous les sorts")]
+    [InlineData("Monsters/Index.cshtml", "← Tous les monstres")]
+    public void Alphabetical_results_link_back_to_the_catalog_selector(string relativePage, string returnLink)
+    {
+        var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
+        var markup = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages",
+            relativePage.Replace('/', Path.DirectorySeparatorChar)));
+
+        Assert.Contains("@if (Model.CatalogPage is null)", markup);
+        Assert.Contains(returnLink, markup);
+    }
+
     [Fact]
     public void Catalog_selection_menus_use_compact_bullet_lists()
     {

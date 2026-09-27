@@ -43,6 +43,7 @@ a:focus-visible {
 }
 .brand { display: block; }
 .brand img { display: block; width: min(14rem, 60vw); height: auto; }
+.edition-label { display: block; color: var(--muted); font-size: .75rem; }
 .main-nav { display: flex; flex-wrap: wrap; gap: .35rem; }
 .main-nav a {
     color: var(--accent-dark);
@@ -51,6 +52,7 @@ a:focus-visible {
     text-decoration: none;
 }
 .main-nav a:hover { color: var(--accent-dark); background: var(--surface-alt); }
+.nav-count { margin-left: .3rem; color: var(--muted); font-size: .85em; }
 .page-content { min-height: calc(100vh - 8rem); padding-block: 2rem 3rem; }
 .page-card {
     padding: clamp(1.25rem, 3vw, 2.5rem);
@@ -94,7 +96,13 @@ h2 { margin-top: 2rem; }
 .portal-card strong { color: var(--accent-dark); font: 1.5rem var(--heading-font); }
 .portal-card span { color: var(--muted); }
 .portal-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-.technical-status { margin-top: 1.5rem; }
+.homepage-technical-status {
+    margin-top: 1.25rem;
+    padding-top: .5rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: .85rem;
+}
 .catalog-list {
     display: grid;
     grid-template-columns: 1fr;
