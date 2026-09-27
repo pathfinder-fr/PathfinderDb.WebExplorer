@@ -30,7 +30,7 @@
     }
     @if (Model.Status.Warnings.Count > 0)
     {
-        <p role="status">Avertissements du catalogue : @string.Join(" ", Model.Status.Warnings)</p>
+        <p role="status">Le chargement a signalé @Model.Status.Warnings.Count avertissements de données.</p>
     }
     @if (Model.Status.State == PathfinderDb.Data.Runtime.DataLoadState.Unavailable)
     {

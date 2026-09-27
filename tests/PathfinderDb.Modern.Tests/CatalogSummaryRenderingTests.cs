@@ -28,6 +28,16 @@ public sealed class CatalogSummaryRenderingTests
     }
 
     [Fact]
+    public void Razor_pages_register_the_partial_tag_helper()
+    {
+        var imports = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "_ViewImports.cshtml"));
+
+        Assert.Contains("@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers", imports);
+    }
+
+    [Fact]
     public void Feat_summary_includes_types_prerequisites_source_and_detail_link()
     {
         var partial = ReadPartial("_FeatCatalogItem.cshtml");

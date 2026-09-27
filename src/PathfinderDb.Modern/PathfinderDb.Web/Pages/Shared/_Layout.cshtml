@@ -19,9 +19,27 @@
                 <span class="edition-label">Pathfinder première édition</span>
             </a>
             <nav class="main-nav" aria-label="Navigation principale">
-                <a href="/dons">Dons@if (catalogStatus.State == DataLoadState.Ready) { <span class="nav-count">@catalogStatus.FeatCount</span> }</a>
-                <a href="/sorts">Sorts@if (catalogStatus.State == DataLoadState.Ready) { <span class="nav-count">@catalogStatus.SpellCount</span> }</a>
-                <a href="/monstres">Monstres@if (catalogStatus.State == DataLoadState.Ready) { <span class="nav-count">@catalogStatus.MonsterCount</span> }</a>
+                <a href="/dons">
+                    Dons
+                    @if (catalogStatus.State == DataLoadState.Ready)
+                    {
+                        <span class="nav-count">@catalogStatus.FeatCount</span>
+                    }
+                </a>
+                <a href="/sorts">
+                    Sorts
+                    @if (catalogStatus.State == DataLoadState.Ready)
+                    {
+                        <span class="nav-count">@catalogStatus.SpellCount</span>
+                    }
+                </a>
+                <a href="/monstres">
+                    Monstres
+                    @if (catalogStatus.State == DataLoadState.Ready)
+                    {
+                        <span class="nav-count">@catalogStatus.MonsterCount</span>
+                    }
+                </a>
             </nav>
         </div>
     </header>

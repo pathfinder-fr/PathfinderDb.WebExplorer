@@ -28,10 +28,12 @@ public sealed class HomepageRenderingTests
 
         Assert.Contains("homepage-technical-status", markup);
         Assert.Contains("Model.Status.Version", markup);
-        Assert.Contains("Model.Status.Errors", markup);
+        Assert.Contains("Model.Status.Warnings.Count", markup);
         Assert.Contains("DataLoadState.Unavailable", markup);
+        Assert.Contains("Model.Status.Errors", markup);
         Assert.Contains("role=\"alert\"", markup);
         Assert.DoesNotContain("detail-grid", markup);
+        Assert.DoesNotContain("string.Join(\" \", Model.Status.Warnings)", markup);
     }
 
     [Fact]
@@ -47,5 +49,8 @@ public sealed class HomepageRenderingTests
         Assert.Contains("catalogStatus.FeatCount", layout);
         Assert.Contains("catalogStatus.SpellCount", layout);
         Assert.Contains("catalogStatus.MonsterCount", layout);
+        Assert.DoesNotContain("Dons@if", layout);
+        Assert.DoesNotContain("Sorts@if", layout);
+        Assert.DoesNotContain("Monstres@if", layout);
     }
 }
