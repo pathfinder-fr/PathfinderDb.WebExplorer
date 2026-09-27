@@ -181,11 +181,24 @@ Publication IIS de la nouvelle application :
 ```
 
 Par défaut, le script publie en `Release`, en mode framework-dependent, dans
-`.\publish\PathfinderDb.Web` (dossier ignoré par Git). Le serveur IIS doit
+`E:\websites\Pathfinder-FR\PathfinderDb.WebExplorer\publish\PathfinderDb.Web`.
+Cette valeur est affichée à chaque lancement. Le script crée le dossier s'il
+n'existe pas, mais ne le supprime pas afin d'éviter les erreurs de fichiers
+verrouillés sous IIS. Le serveur IIS doit
 disposer de l'Hosting Bundle .NET 10 et le pool d'application doit être
 configuré avec **No Managed Code**. Le chemin de données reste externe au
 dossier publié et doit être fourni à IIS via la variable
 `PathfinderData__RootPath`.
+
+Pour publier sur le site IIS actif sans arrêter tout son AppPool, le script
+place temporairement `app_offline.htm` dans le dossier de publication. ASP.NET
+Core Module arrête alors l'application, le script attend la libération des
+fichiers (30 secondes par défaut), publie, puis retire le fichier afin que le
+site redémarre à la prochaine requête. Le site affiche une page d'indisponibilité
+pendant le déploiement. Le délai peut être ajusté avec
+`-AppOfflineTimeoutSeconds 60`. Les fichiers obsolètes ne sont pas supprimés :
+retirer manuellement ceux qui ne sont plus utilisés, une fois le déploiement
+terminé.
 
 Options utiles :
 
