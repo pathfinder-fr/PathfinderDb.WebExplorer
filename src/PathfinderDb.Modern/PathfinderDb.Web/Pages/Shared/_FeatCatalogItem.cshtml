@@ -1,0 +1,25 @@
+@model PathfinderDb.Data.Domain.Feat
+<li class="catalog-item">
+    <article>
+        <h3><a href="/dons/detail/@Model.Id">@Model.Name</a></h3>
+        @if (Model.Types.Count > 0)
+        {
+            <p><strong>Types :</strong> @string.Join(", ", Model.Types.Select(CatalogText.FormatFeatType))</p>
+        }
+        @if (Model.Prerequisites.Count > 0)
+        {
+            <p><strong>Pré-requis :</strong> @string.Join(" ; ", Model.Prerequisites.Select(CatalogText.FormatPrerequisite))</p>
+        }
+        @if (Model.Source is not null)
+        {
+            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+        }
+        @foreach (var reference in Model.References.Where(CatalogText.IsPathfinderWikiReference))
+        {
+            var referenceUrl = reference.HrefString ?? reference.Href;
+            <p class="reference-links">
+                <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">Wiki Pathfinder-fr.org</a>
+            </p>
+        }
+    </article>
+</li>

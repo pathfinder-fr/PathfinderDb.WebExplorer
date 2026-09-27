@@ -91,4 +91,46 @@ public sealed class CatalogTextTests
     {
         Assert.Equal(expected, _text.FormatFeatType(value));
     }
+
+    [Theory]
+    [InlineData("Verbal", "Verbale")]
+    [InlineData("Somatic", "Somatique")]
+    [InlineData("Material", "Matérielle")]
+    [InlineData("Focus", "Focaliseur")]
+    [InlineData("DivineFocus", "Focaliseur divin")]
+    [InlineData("FocusOrDivineFocus", "Focaliseur ou focaliseur divin")]
+    [InlineData("somatic", "Somatique")]
+    [InlineData("UnknownComponent", "UnknownComponent")]
+    public void Formats_spell_components_in_french_with_unknown_fallback(string value, string expected)
+    {
+        Assert.Equal(expected, _text.FormatSpellComponent(value));
+    }
+
+    [Theory]
+    [InlineData("https://www.pathfinder-fr.org/Wiki/Spell", true)]
+    [InlineData("http://sub.pathfinder-fr.org/Wiki/Spell", true)]
+    [InlineData("https://pathfinder-fr.org/Wiki/Spell", true)]
+    [InlineData("https://paizo.com/pathfinderRPG/prd/spell", false)]
+    [InlineData("https://www.regles-pathfinder.fr/spell", false)]
+    [InlineData("https://pathfinder-fr.org.attacker.test/spell", false)]
+    [InlineData("/Wiki/Spell", false)]
+    [InlineData("not a URI", false)]
+    public void Accepts_only_absolute_pathfinder_wiki_reference_hosts(string href, bool expected)
+    {
+        var reference = new Reference(null, href, null, "fr");
+
+        Assert.Equal(expected, _text.IsPathfinderWikiReference(reference));
+    }
+
+    [Fact]
+    public void Prefers_the_reference_url_string_when_filtering_wiki_links()
+    {
+        var reference = new Reference(
+            null,
+            "https://paizo.com/spell",
+            "https://www.pathfinder-fr.org/Wiki/Spell",
+            "fr");
+
+        Assert.True(_text.IsPathfinderWikiReference(reference));
+    }
 }

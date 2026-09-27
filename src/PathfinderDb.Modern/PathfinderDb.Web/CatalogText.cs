@@ -96,12 +96,34 @@ public sealed class CatalogText(IDataSnapshotProvider? provider = null)
             ["Teamwork"] = "Équipe"
         };
 
+    private static readonly IReadOnlyDictionary<string, string> SpellComponents =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Verbal"] = "Verbale",
+            ["Somatic"] = "Somatique",
+            ["Material"] = "Matérielle",
+            ["Focus"] = "Focaliseur",
+            ["DivineFocus"] = "Focaliseur divin",
+            ["FocusOrDivineFocus"] = "Focaliseur ou focaliseur divin"
+        };
+
     public string FormatChallengeRating(decimal challengeRating) =>
         challengeRating.ToString("G29", CultureInfo.InvariantCulture);
 
     public string FormatSource(string value) => Format(value, Sources);
 
     public string FormatSpellList(string value) => Format(value, SpellLists);
+
+    public string FormatSpellComponent(string value) => Format(value, SpellComponents);
+
+    public bool IsPathfinderWikiReference(Reference reference)
+    {
+        var value = reference.HrefString ?? reference.Href;
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri) &&
+            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) &&
+            (string.Equals(uri.Host, "pathfinder-fr.org", StringComparison.OrdinalIgnoreCase) ||
+             uri.Host.EndsWith(".pathfinder-fr.org", StringComparison.OrdinalIgnoreCase));
+    }
 
     public string FormatSpellSchool(string value) => FormatLabel("spellSchool", value, SpellSchools);
 

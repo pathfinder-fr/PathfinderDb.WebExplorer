@@ -1,0 +1,26 @@
+@model PathfinderDb.Data.Domain.Monster
+<li class="catalog-item">
+    <article>
+        <h3><a href="/monstres/detail/@Model.Id">@Model.Name</a></h3>
+        @if (Model.ChallengeRating is { } challengeRating)
+        {
+            <p><strong>FP :</strong> @CatalogText.FormatChallengeRating(challengeRating)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Type))
+        {
+            <p><strong>Type :</strong> @CatalogText.FormatMonsterType(Model.Type)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Climate))
+        {
+            <p><strong>Climat :</strong> @CatalogText.FormatCreatureClimate(Model.Climate)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Environment))
+        {
+            <p><strong>Environnement :</strong> @CatalogText.FormatCreatureEnvironment(Model.Environment)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Source?.Id))
+        {
+            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+        }
+    </article>
+</li>

@@ -34,7 +34,10 @@
     {
         <h2>Lettre @Model.CatalogPage.Bucket</h2>
         <ol class="catalog-list">
-            @foreach (var spell in Model.CatalogPage.Items) { <li><a href="/sorts/detail/@spell.Id">@spell.Name</a></li> }
+            @foreach (var spell in Model.CatalogPage.Items)
+            {
+                <partial name="_SpellCatalogItem" model="spell" />
+            }
         </ol>
         <nav class="pagination" aria-label="Pagination">
             @if (Model.CatalogPage.HasPreviousPage) { <a href="/sorts/@Model.CatalogPage.Bucket?page=@(Model.CatalogPage.Page - 1)">Précédent</a> }

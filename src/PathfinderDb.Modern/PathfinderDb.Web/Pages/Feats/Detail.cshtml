@@ -29,7 +29,7 @@
             @foreach (var reference in Model.Feat.References)
             {
                 var referenceUrl = reference.HrefString ?? reference.Href;
-                if (!string.IsNullOrWhiteSpace(referenceUrl))
+                if (CatalogText.IsPathfinderWikiReference(reference))
                 {
                     <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">@(reference.Name ?? "Source")</a>
                 }

@@ -10,7 +10,7 @@
     <ol class="catalog-list">
         @foreach (var feat in Model.CatalogPage.Items)
         {
-            <li><a href="/dons/detail/@feat.Id">@feat.Name</a></li>
+            <partial name="_FeatCatalogItem" model="feat" />
         }
     </ol>
     <nav class="pagination" aria-label="Pagination">

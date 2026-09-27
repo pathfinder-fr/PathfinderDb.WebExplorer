@@ -94,9 +94,9 @@ public sealed class CatalogRouteTests
             repositoryRoot,
             "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
 
-        Assert.Matches(@"\.catalog-list\s*\{[^}]*grid-template-columns:\s*repeat\(3,", stylesheet);
-        Assert.Contains("min-height: 2.9rem", stylesheet);
-        Assert.Contains(".catalog-list > a,\r\n.catalog-list > li a", stylesheet);
+        Assert.Matches(@"\.catalog-list\s*\{[^}]*grid-template-columns:\s*1fr", stylesheet);
+        Assert.Contains(".catalog-item", stylesheet);
+        Assert.Contains("grid-template-columns: 1fr", stylesheet);
         Assert.DoesNotContain(".bucket-nav", stylesheet);
         Assert.DoesNotContain("class=\"bucket-nav\"", monsters);
         Assert.DoesNotContain("class=\"bucket-nav\"", spells);
@@ -127,5 +127,7 @@ public sealed class CatalogRouteTests
         Assert.Contains("Model.Spell.References", spells);
         Assert.Contains("target=\"_blank\"", feats);
         Assert.Contains("target=\"_blank\"", spells);
+        Assert.Contains("CatalogText.IsPathfinderWikiReference(reference)", feats);
+        Assert.Contains("CatalogText.IsPathfinderWikiReference(reference)", spells);
     }
 }

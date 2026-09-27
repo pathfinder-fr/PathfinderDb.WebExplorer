@@ -10,7 +10,7 @@
     <ol class="catalog-list">
         @foreach (var spell in Model.CatalogPage.Items)
         {
-            <li><a href="/sorts/detail/@spell.Id">@spell.Name</a></li>
+            <partial name="_SpellCatalogItem" model="spell" />
         }
     </ol>
     <nav class="pagination" aria-label="Pagination">

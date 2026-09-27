@@ -1,0 +1,49 @@
+@model PathfinderDb.Data.Domain.Spell
+@{
+    var originalName = Model.Localization.FirstOrDefault(localization =>
+        string.Equals(localization.Key, "en-US:name", StringComparison.OrdinalIgnoreCase)).Value;
+}
+<li class="catalog-item">
+    <article>
+        <h3><a href="/sorts/detail/@Model.Id">@Model.Name</a></h3>
+        @if (!string.IsNullOrWhiteSpace(Model.School))
+        {
+            <p><strong>École :</strong> @CatalogText.FormatSpellSchool(Model.School)</p>
+        }
+        @if (Model.Levels.Count > 0)
+        {
+            <p><strong>Niveaux :</strong> @string.Join(", ", Model.Levels.Select(level => $"{CatalogText.FormatSpellList(level.List)} {level.Level}"))</p>
+        }
+        @if (Model.ComponentKinds.Count > 0)
+        {
+            <p><strong>Composantes :</strong> @string.Join(", ", Model.ComponentKinds.Select(CatalogText.FormatSpellComponent))</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Range))
+        {
+            <p><strong>Portée :</strong> @Model.Range</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Target))
+        {
+            <p><strong>Cible :</strong> @Model.Target</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.CastingTime))
+        {
+            <p><strong>Temps d'incantation :</strong> @Model.CastingTime</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Source?.Id))
+        {
+            <p><strong>Source :</strong> @CatalogText.FormatSource(Model.Source.Id)</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(originalName))
+        {
+            <p><strong>Nom VO :</strong> @originalName</p>
+        }
+        @foreach (var reference in Model.References.Where(CatalogText.IsPathfinderWikiReference))
+        {
+            var referenceUrl = reference.HrefString ?? reference.Href;
+            <p class="reference-links">
+                <a href="@referenceUrl" target="_blank" rel="noopener noreferrer">Wiki Pathfinder-fr.org</a>
+            </p>
+        }
+    </article>
+</li>
