@@ -36,10 +36,10 @@ $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 
 if (Test-Path -LiteralPath $OutputPath) {
     Write-Host "Cleaning publish directory: $OutputPath"
-    Remove-Item -LiteralPath $OutputPath -Recurse -Force
+    #Remove-Item -LiteralPath $OutputPath -Recurse -Force
 }
 
-New-Item -ItemType Directory -Path $OutputPath -Force | Out-Null
+#New-Item -ItemType Directory -Path $OutputPath -Force | Out-Null
 
 $publishArguments = @(
     "publish",
