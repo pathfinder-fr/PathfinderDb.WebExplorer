@@ -10,6 +10,7 @@ public sealed class CatalogRouteTests
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySchool.cshtml", "@page \"/sorts/ecole/{school}\"")]
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/ByClass.cshtml", "@page \"/sorts/classe/{class}\"")]
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySource.cshtml", "@page \"/sorts/source/{source}\"")]
+    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/ByLevel.cshtml", "@page \"/sorts/niveau/{level}\"")]
     [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Monsters/Detail.cshtml", "@page \"/monstres/detail/{slug}\"")]
     public void Dimension_pages_declare_canonical_routes(string relativePath, string route)
     {
@@ -30,6 +31,7 @@ public sealed class CatalogRouteTests
 
         Assert.Contains("Par type", feats);
         Assert.Contains("Par école", spells);
+        Assert.Contains("Par niveau", spells);
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", feats);
         Assert.DoesNotContain("Model.CatalogPage!.Bucket", spells);
     }

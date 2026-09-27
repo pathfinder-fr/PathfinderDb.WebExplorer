@@ -32,6 +32,17 @@ public sealed class DataSnapshot
         MonstersBySource = BuildStringIndex(Monsters, monster => [monster.Source?.Id]);
         SpellsBySchool = BuildStringIndex(Spells, spell => [spell.School]);
         SpellsByList = BuildStringIndex(Spells, spell => spell.Levels.Select(level => level.List));
+        SpellsByLevel = new ReadOnlyDictionary<int, IReadOnlyList<Spell>>(Spells
+            .SelectMany(spell => spell.Levels
+                .Where(level => level.Level >= 0)
+                .Select(level => (Spell: spell, level.Level)))
+            .GroupBy(entry => entry.Level)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyList<Spell>)group
+                    .Select(entry => entry.Spell)
+                    .DistinctBy(spell => spell.Id, StringComparer.OrdinalIgnoreCase)
+                    .ToArray()));
         SpellsBySource = BuildStringIndex(Spells, spell => [spell.Source?.Id]);
         FeatsByType = BuildStringIndex(Feats, feat => feat.Types);
         FeatsBySource = BuildStringIndex(Feats, feat => [feat.Source?.Id]);
@@ -56,6 +67,7 @@ public sealed class DataSnapshot
     public IReadOnlyDictionary<string, IReadOnlyList<Monster>> MonstersBySource { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsBySchool { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsByList { get; }
+    public IReadOnlyDictionary<int, IReadOnlyList<Spell>> SpellsByLevel { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Spell>> SpellsBySource { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsByType { get; }
     public IReadOnlyDictionary<string, IReadOnlyList<Feat>> FeatsBySource { get; }

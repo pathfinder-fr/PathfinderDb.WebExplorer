@@ -37,6 +37,9 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
     public CatalogPage<Spell>? GetSpellsByList(string? list, int page = 1) =>
         GetPage(provider.Current?.SpellsByList, NormalizeBucket(list), page);
 
+    public CatalogPage<Spell>? GetSpellsByLevel(int level, int page = 1) =>
+        GetPage(provider.Current?.SpellsByLevel, level, page);
+
     public CatalogPage<Spell>? GetSpellsBySource(string? source, int page = 1) =>
         GetPage(provider.Current?.SpellsBySource, NormalizeBucket(source), page);
 
@@ -73,6 +76,9 @@ public sealed class CatalogService(IDataSnapshotProvider provider)
 
     public IReadOnlyList<string> SpellListBuckets =>
         provider.Current?.SpellsByList.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];
+
+    public IReadOnlyList<int> SpellLevelBuckets =>
+        provider.Current?.SpellsByLevel.Keys.Order().ToArray() ?? [];
 
     public IReadOnlyList<string> SpellSourceBuckets =>
         provider.Current?.SpellsBySource.Keys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToArray() ?? [];

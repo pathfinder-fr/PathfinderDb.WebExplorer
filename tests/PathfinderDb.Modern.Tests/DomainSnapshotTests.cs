@@ -50,6 +50,36 @@ public sealed class DomainSnapshotTests
     }
 
     [Fact]
+    public void Snapshot_groups_each_spell_once_per_nonnegative_level()
+    {
+        var snapshot = new DataSnapshot(
+            [],
+            [
+                new Spell("multi", "Multi Level", "Evocation",
+                    [
+                        new SpellLevel("wizard", 2),
+                        new SpellLevel("cleric", 2),
+                        new SpellLevel("wizard", 2),
+                        new SpellLevel("bard", 3),
+                        new SpellLevel("invalid", -1)
+                    ],
+                    [], null, null, null, null, new Dictionary<string, string>()),
+                new Spell("cantrip", "Cantrip", "Illusion",
+                    [new SpellLevel("wizard", 0)],
+                    [], null, null, null, null, new Dictionary<string, string>())
+            ],
+            [],
+            [],
+            "version");
+
+        Assert.Equal([0, 2, 3], snapshot.SpellsByLevel.Keys.Order());
+        Assert.Equal(["cantrip"], snapshot.SpellsByLevel[0].Select(spell => spell.Id));
+        Assert.Equal(["multi"], snapshot.SpellsByLevel[2].Select(spell => spell.Id));
+        Assert.Equal(["multi"], snapshot.SpellsByLevel[3].Select(spell => spell.Id));
+        Assert.Equal(5, snapshot.SpellsByLevel[2][0].Levels.Count);
+    }
+
+    [Fact]
     public void Catalog_entries_preserve_item_level_origin_references()
     {
         var reference = new Reference("Wiki Pathfinder-fr.org", "https://example.test/wiki", null, "fr");

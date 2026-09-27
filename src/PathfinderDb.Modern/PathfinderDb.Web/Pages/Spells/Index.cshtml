@@ -17,6 +17,10 @@
         <ul class="selection-list" aria-label="Classes">
             @foreach (var spellClass in Model.Classes) { <li><a href="/sorts/classe/@(spellClass)">@CatalogText.FormatSpellList(spellClass)</a></li> }
         </ul>
+        <h2>Par niveau</h2>
+        <ul class="selection-list" aria-label="Niveaux de sorts">
+            @foreach (var level in Model.Levels) { <li><a href="/sorts/niveau/@level">@level</a></li> }
+        </ul>
         <h2>Par source</h2>
         <ul class="selection-list" aria-label="Sources des sorts">
             @foreach (var source in Model.Sources) { <li><a href="/sorts/source/@source">@CatalogText.FormatSource(source)</a></li> }

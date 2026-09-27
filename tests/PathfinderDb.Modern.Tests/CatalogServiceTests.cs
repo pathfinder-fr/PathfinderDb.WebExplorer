@@ -139,6 +139,35 @@ public sealed class CatalogServiceTests
         Assert.Null(service.GetSpellsBySchool("missing"));
     }
 
+    [Fact]
+    public void Spell_level_catalog_discovers_buckets_and_paginates()
+    {
+        var spells = Enumerable.Range(1, 51)
+            .Select(index => new Spell(
+                $"spell-{index}",
+                $"Spell {index:00}",
+                "Evocation",
+                [new SpellLevel("wizard", 1)],
+                [], null, null, null, null, new Dictionary<string, string>()))
+            .ToArray();
+        var service = new CatalogService(new TestProvider(new DataSnapshot(
+            [], spells, [], [], "version")));
+
+        var firstPage = service.GetSpellsByLevel(1);
+        var secondPage = service.GetSpellsByLevel(1, 2);
+
+        Assert.Equal([1], service.SpellLevelBuckets);
+        Assert.NotNull(firstPage);
+        Assert.Equal(50, firstPage!.Items.Count);
+        Assert.True(firstPage.HasNextPage);
+        Assert.NotNull(secondPage);
+        Assert.Single(secondPage!.Items);
+        Assert.Equal([new SpellLevel("wizard", 1)], secondPage.Items[0].Levels);
+        Assert.Null(service.GetSpellsByLevel(9));
+        Assert.Null(service.GetSpellsByLevel(1, 0));
+        Assert.Null(service.GetSpellsByLevel(1, 3));
+    }
+
     private sealed class TestProvider(DataSnapshot snapshot) : IDataSnapshotProvider
     {
         public DataSnapshot? Current => snapshot;

@@ -12,6 +12,7 @@ public sealed class IndexModel(CatalogService catalogs) : PageModel
     public IReadOnlyList<string> Buckets { get; private set; } = [];
     public IReadOnlyList<string> Schools => catalogs.SpellSchoolBuckets;
     public IReadOnlyList<string> Classes => catalogs.SpellListBuckets;
+    public IReadOnlyList<int> Levels => catalogs.SpellLevelBuckets;
     public IReadOnlyList<string> Sources => catalogs.SpellSourceBuckets;
 
     public IActionResult OnGet(string? initial, [FromQuery] int page = 1)
