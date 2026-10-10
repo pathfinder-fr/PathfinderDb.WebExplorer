@@ -1,5 +1,6 @@
 @page
 @model IndexModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Accueil";
 }
@@ -42,9 +43,11 @@
     </div>
 </section>
 <footer class="homepage-technical-status">
-    @if (Model.Status.Version is not null)
+    @if (Model.Status.GeneratedAt is { } generatedAt)
     {
-        <p>Version des données : <code>@Model.Status.Version</code></p>
+        <p>Dernière génération des données :
+            <time datetime="@generatedAt.ToString("O")">@generatedAt.ToLocalTime().ToString("d MMMM yyyy", CultureInfo.GetCultureInfo("fr-FR"))</time>
+        </p>
     }
     @if (Model.Status.Warnings.Count > 0)
     {

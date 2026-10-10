@@ -19,7 +19,7 @@ public sealed class HomepageRenderingTests
     }
 
     [Fact]
-    public void Homepage_shows_version_and_unavailable_errors_in_compact_technical_footer()
+    public void Homepage_shows_data_generation_date_instead_of_version_and_keeps_unavailable_errors_visible()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var markup = File.ReadAllText(Path.Combine(
@@ -27,7 +27,8 @@ public sealed class HomepageRenderingTests
             "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Index.cshtml"));
 
         Assert.Contains("homepage-technical-status", markup);
-        Assert.Contains("Model.Status.Version", markup);
+        Assert.Contains("Model.Status.GeneratedAt", markup);
+        Assert.DoesNotContain("Model.Status.Version", markup);
         Assert.Contains("Model.Status.Warnings.Count", markup);
         Assert.Contains("DataLoadState.Unavailable", markup);
         Assert.Contains("Model.Status.Errors", markup);

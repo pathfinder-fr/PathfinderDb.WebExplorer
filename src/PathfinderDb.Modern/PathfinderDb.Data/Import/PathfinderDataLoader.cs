@@ -71,9 +71,17 @@ public sealed class PathfinderDataLoader(IOptions<PathfinderDataOptions> options
             if (!validation.IsValid)
                 return new(null, validation, null);
 
-            var versionPaths = labels is null ? paths.Values : paths.Values.Append(labelsPath);
+            var versionPaths = (labels is null ? paths.Values : paths.Values.Append(labelsPath)).ToArray();
             var version = await ComputeVersionAsync(versionPaths, cancellationToken);
-            return new(new DataSnapshot(featModels, spellModels, monsterModels, sources.Values, version, labelCatalog), validation, version);
+            var generatedAt = versionPaths.Select(File.GetLastWriteTimeUtc).Max();
+            return new(new DataSnapshot(
+                featModels,
+                spellModels,
+                monsterModels,
+                sources.Values,
+                version,
+                labelCatalog,
+                new DateTimeOffset(generatedAt)), validation, version);
         }
         catch (JsonException ex)
         {

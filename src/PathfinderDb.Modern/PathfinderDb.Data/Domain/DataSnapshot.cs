@@ -10,9 +10,11 @@ public sealed class DataSnapshot
         IEnumerable<Monster> monsters,
         IEnumerable<Source> sources,
         string version,
-        LabelCatalog? labels = null)
+        LabelCatalog? labels = null,
+        DateTimeOffset? generatedAt = null)
     {
         Version = string.IsNullOrWhiteSpace(version) ? throw new ArgumentException("A snapshot version is required.", nameof(version)) : version;
+        GeneratedAt = generatedAt;
         Feats = feats.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
         Spells = spells.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
         Monsters = monsters.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase).ToArray();
@@ -49,6 +51,7 @@ public sealed class DataSnapshot
     }
 
     public string Version { get; }
+    public DateTimeOffset? GeneratedAt { get; }
     public IReadOnlyList<Feat> Feats { get; }
     public IReadOnlyList<Spell> Spells { get; }
     public IReadOnlyList<Monster> Monsters { get; }

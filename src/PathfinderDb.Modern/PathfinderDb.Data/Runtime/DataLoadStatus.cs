@@ -18,10 +18,18 @@ public sealed record DataLoadStatus(
     IReadOnlyList<string> Warnings,
     IReadOnlyList<string> Errors)
 {
+    public DateTimeOffset? GeneratedAt { get; init; }
+
     public static DataLoadStatus LoadingStatus() => new(DataLoadState.Loading, null, 0, 0, 0, [], []);
     public static DataLoadStatus ReadyStatus(DataSnapshot snapshot, IReadOnlyList<string> warnings) =>
-        new(DataLoadState.Ready, snapshot.Version, snapshot.Feats.Count, snapshot.Spells.Count, snapshot.Monsters.Count, warnings, []);
+        new(DataLoadState.Ready, snapshot.Version, snapshot.Feats.Count, snapshot.Spells.Count, snapshot.Monsters.Count, warnings, [])
+        {
+            GeneratedAt = snapshot.GeneratedAt
+        };
     public static DataLoadStatus UnavailableStatus(IEnumerable<string> errors, DataSnapshot? previous) =>
         new(DataLoadState.Unavailable, previous?.Version, previous?.Feats.Count ?? 0, previous?.Spells.Count ?? 0,
-            previous?.Monsters.Count ?? 0, [], errors.ToArray());
+            previous?.Monsters.Count ?? 0, [], errors.ToArray())
+        {
+            GeneratedAt = previous?.GeneratedAt
+        };
 }

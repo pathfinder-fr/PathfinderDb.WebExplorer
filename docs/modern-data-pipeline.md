@@ -77,9 +77,11 @@ The visual layer is kept static and server-rendered so it does not add a
 client-side framework or reduce CDN cacheability.
 
 The homepage is reader-first: it presents direct entry points for dons, sorts,
-and monstres before a compact technical footer. The footer shows the data
-version when available and keeps loading warnings or unavailable-state errors
-visible. The shared header identifies the content as Pathfinder première
+and monstres before a compact technical footer. The footer shows the latest
+modification date among the loaded JSON exports as the data generation date
+when available, and keeps loading warnings or unavailable-state errors visible.
+The content hash remains an internal snapshot version for cache validation.
+The shared header identifies the content as Pathfinder première
 édition and shows catalog counts only while the data snapshot is ready. The
 shared shell uses the legacy `pf-fr-db.png` logo on a warm parchment/ivory
 palette with serif headings; the logo is copied into the modern static assets
