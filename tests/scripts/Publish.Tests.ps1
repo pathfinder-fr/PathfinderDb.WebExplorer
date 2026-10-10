@@ -1,7 +1,53 @@
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$publishScript = Join-Path $repositoryRoot "scripts\publish-modern.ps1"
+$publishScript = Join-Path $repositoryRoot "scripts\publish.ps1"
+$publishBatch = Join-Path $repositoryRoot "publish.bat"
 
-Describe "publish-modern.ps1" {
+Describe "publish.ps1 and publish.bat" {
+    It "runs the publisher relative to the wrapper, forwards arguments, and returns its exit code" {
+        if (-not (Test-Path -LiteralPath $publishBatch -PathType Leaf)) {
+            $false | Should Be $true
+            return
+        }
+
+        $wrapperRoot = Join-Path $TestDrive "wrapper"
+        $wrapperScripts = Join-Path $wrapperRoot "scripts"
+        $testBatch = Join-Path $wrapperRoot "publish.bat"
+        $stubPublisher = Join-Path $wrapperScripts "publish.ps1"
+        $capturePath = Join-Path $TestDrive "publisher-arguments.json"
+        New-Item -ItemType Directory -Path $wrapperScripts -Force | Out-Null
+        Copy-Item -LiteralPath $publishBatch -Destination $testBatch
+        @'
+param(
+    [int]$ExitCode,
+    [string]$CapturePath
+)
+
+[pscustomobject]@{
+    ExitCode = $ExitCode
+    CapturePath = $CapturePath
+    WorkingDirectory = (Get-Location).Path
+} | ConvertTo-Json | Set-Content -LiteralPath $CapturePath
+exit $ExitCode
+'@ | Set-Content -LiteralPath $stubPublisher
+
+        Push-Location $TestDrive
+        try {
+            $command = "`"$testBatch`" -ExitCode 37 -CapturePath `"$capturePath`""
+            $output = & $env:ComSpec /d /c $command 2>&1 | Out-String
+            $wrapperExitCode = $LASTEXITCODE
+        }
+        finally {
+            Pop-Location
+        }
+
+        $wrapperExitCode | Should Be 37
+        $capture = Get-Content -LiteralPath $capturePath -Raw | ConvertFrom-Json
+        $capture.ExitCode | Should Be 37
+        $capture.CapturePath | Should Be $capturePath
+        [System.IO.Path]::GetFullPath($capture.WorkingDirectory).TrimEnd([System.IO.Path]::DirectorySeparatorChar) |
+            Should Be ([System.IO.Path]::GetFullPath($TestDrive).TrimEnd([System.IO.Path]::DirectorySeparatorChar))
+    }
+
     It "creates the output directory and takes the IIS site offline while publishing without deleting existing files" {
         $outputPath = Join-Path $TestDrive "publish"
         $lockedFile = Join-Path $outputPath "keep.txt"
@@ -11,8 +57,10 @@ Describe "publish-modern.ps1" {
         $global:PublishModernTestObservedOffline = $false
         $global:PublishModernTestExistingFilePreserved = $false
         $global:PublishModernTestFileUnlocked = $false
+        $global:PublishModernTestProjectPath = $null
 
         function global:dotnet {
+            $global:PublishModernTestProjectPath = $args[1]
             $global:PublishModernTestObservedOffline = Test-Path -LiteralPath (Join-Path $global:PublishModernTestOutputPath "app_offline.htm")
             $global:PublishModernTestExistingFilePreserved = Test-Path -LiteralPath (Join-Path $global:PublishModernTestOutputPath "keep.txt")
             try {
@@ -52,6 +100,8 @@ Describe "publish-modern.ps1" {
             $elapsed = [DateTime]::UtcNow - $startedAt
 
             $global:PublishModernTestObservedOffline | Should Be $true
+            [System.IO.Path]::GetFullPath($global:PublishModernTestProjectPath) |
+                Should Be (Join-Path $repositoryRoot "src\PathfinderDb.Web\PathfinderDb.Web.csproj")
             $global:PublishModernTestExistingFilePreserved | Should Be $true
             $global:PublishModernTestFileUnlocked | Should Be $true
             ($elapsed.TotalMilliseconds -ge 1000) | Should Be $true
@@ -65,7 +115,7 @@ Describe "publish-modern.ps1" {
                 Remove-Job $lockJob -Force -ErrorAction SilentlyContinue
             }
             Remove-Item Function:\global:dotnet -ErrorAction SilentlyContinue
-            Remove-Variable PublishModernTestOutputPath, PublishModernTestLockedFile, PublishModernTestObservedOffline, PublishModernTestExistingFilePreserved, PublishModernTestFileUnlocked -Scope Global -ErrorAction SilentlyContinue
+            Remove-Variable PublishModernTestOutputPath, PublishModernTestLockedFile, PublishModernTestObservedOffline, PublishModernTestExistingFilePreserved, PublishModernTestFileUnlocked, PublishModernTestProjectPath -Scope Global -ErrorAction SilentlyContinue
         }
     }
 

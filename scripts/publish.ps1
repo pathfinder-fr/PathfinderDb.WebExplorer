@@ -18,7 +18,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$projectPath = Join-Path $repositoryRoot "src\PathfinderDb.Modern\PathfinderDb.Web\PathfinderDb.Web.csproj"
+$projectPath = Join-Path $repositoryRoot "src\PathfinderDb.Web\PathfinderDb.Web.csproj"
 
 if (-not (Test-Path -LiteralPath $projectPath -PathType Leaf)) {
     throw "Modern web project was not found: $projectPath"
