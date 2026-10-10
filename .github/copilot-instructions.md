@@ -1,17 +1,20 @@
 # Repository guidance
 
-This repository contains two Pathfinder data-browsing applications. Keep the
-legacy application working while making most new application changes in the
-modern .NET 10 implementation.
+This repository contains the current .NET 10 Pathfinder site and its archived
+ASP.NET MVC 4 predecessor. Make all current application, build, test, and
+deployment changes against the modern implementation; legacy code lives under
+`archive\legacy` and is retained for reference.
 
 ## Build and test
 
 Run commands from the repository root in PowerShell.
 
-Build the modern application and its data library:
+Build the current application and its data library from the root solution:
 
 ```powershell
-dotnet build src\PathfinderDb.Modern\PathfinderDb.Modern.sln --configuration Release
+.\build.cmd
+# Equivalent:
+dotnet build PathfinderDb.sln --configuration Release
 ```
 
 Run the modern unit tests, or a single test class:
@@ -28,25 +31,23 @@ $env:PATHFINDER_DATA_ROOT = 'D:\code\perso\pf\pf1-data'
 dotnet test tests\PathfinderDb.Modern.IntegrationTests\PathfinderDb.Modern.IntegrationTests.csproj
 ```
 
-The legacy ASP.NET MVC 4 application targets .NET Framework 4.6 and uses the
-Windows/MSBuild build wrapper:
+Run the current site locally:
 
 ```powershell
-.\build.cmd
+dotnet run --project src\PathfinderDb.Web\PathfinderDb.Web.csproj
 ```
 
 There is no repository-defined lint command.
 
 ## Architecture
 
-- `src\PathfinderDb.WebExplorer` is the legacy ASP.NET MVC 4 app. Its
-  `MemoryDataSet` loads selected XML files from `App_Data` into the
-  `PathfinderDb.Schema` in-memory model; controllers and Razor views provide
-  feat and spell browsing.
-- `src\PathfinderDb.Modern` is the .NET 10 replacement developed alongside the
-  legacy app. `PathfinderDb.Data` owns JSON import, domain models, validation,
-  immutable snapshots, and catalog indexes. `PathfinderDb.Web` is an ASP.NET
-  Core Razor Pages host that reads those catalogs through `CatalogService`.
+- `src\PathfinderDb.Web` is the current ASP.NET Core Razor Pages host.
+- `src\PathfinderDb.Data` owns JSON import, domain models, validation,
+  immutable snapshots, and catalog indexes. The web host reads those catalogs
+  through `CatalogService`.
+- `archive\legacy\src\PathfinderDb.WebExplorer` is the archived ASP.NET MVC 4
+  app. Its `MemoryDataSet` loads selected XML files from `App_Data`; do not
+  target it for current feature work.
 - The modern app reads `feats.json`, `spells.json`, and `monsters.json` from an
   external `pf1-data` clone configured with `PathfinderData:RootPath` or
   `PathfinderData__RootPath`; the clone is not part of this repository or
@@ -84,3 +85,10 @@ There is no repository-defined lint command.
   as the fallback for missing labels.
 - Keep data reloads atomic. Do not replace a valid snapshot or invalidate its
   cache when loading or validation fails.
+- The root `publish.bat` performs a direct publish to the IIS output directory.
+  The scheduled `job.cmd` is the server entry point: it requires branch
+  `master`, runs `git reset --hard`, then `git pull --ff-only origin master`,
+  and publishes only if Git succeeds. It never runs `git clean`, so untracked
+  files remain.
+- Do not run `job.cmd` against a developer checkout: it intentionally discards
+  local changes to tracked files before pulling.

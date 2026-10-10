@@ -1,214 +1,72 @@
 # PathfinderDb.WebExplorer
 
-Projet legacy d'exploration de données Pathfinder 1e, historiquement publié sur https://db.pathfinder-fr.org/.
+Application de consultation des données Pathfinder première édition en français.
+Le site courant est l’application ASP.NET Core Razor Pages sous
+`.NET 10`; l’ancien site ASP.NET MVC 4 est conservé dans `archive\legacy`.
 
-Ce dépôt contient l'application web qui servait à parcourir les fiches de dons et de sorts de Pathfinder, sur la base de jeux de données XML produits à partir du wiki Pathfinder-fr.org.
+## Projets
 
-## Résumé de l'analyse
+- `src\PathfinderDb.Web` : site web ASP.NET Core Razor Pages.
+- `src\PathfinderDb.Data` : import JSON, modèles, validation et catalogues.
+- `tests\PathfinderDb.Modern.Tests` : tests unitaires du site courant.
+- `tests\PathfinderDb.Modern.IntegrationTests` : tests opt-in sur un clone réel
+  de `pf1-data`.
+- `archive\legacy` : application MVC 4 historique et ses fichiers XML.
 
-Le site est une application ASP.NET MVC 4 vieille génération, ciblant le .NET Framework 4.6. L'architecture actuelle est très monolithique et repose sur des fichiers XML embarqués, sans base de données relationnelle ni pipeline d'import moderne.
-
-La logique métier est centrée sur le package `PathfinderDb.Schema`, qui fournit les types de données métier (`Feat`, `Spell`, `Source`, etc.) et la structure de données à partir des fichiers XML.
-
-## Stack technique actuelle
-
-- ASP.NET MVC 4
-- .NET Framework 4.6
-- Razor Views
-- Bootstrap 2.x / jQuery
-- packages NuGet legacy (`Microsoft.AspNet.*`, `Newtonsoft.Json`, `PathfinderDb.Schema`)
-- build Windows/MSBuild via `build.cmd` et `build/build.proj`
-
-## Structure du dépôt
-
-### `src/PathfinderDb.WebExplorer`
-
-- `Controllers/`
-  - `HomeController.cs` : page d'accueil
-  - `FeatController.cs` : recherche et filtrage de dons
-  - `SpellController.cs` : recherche et filtrage de sorts
-  - `ControllerExtensions.cs` : accès au jeu de données courant
-- `Models/`
-  - `MemoryDataSet.cs` : charge les données XML en mémoire
-  - gestion de filtres et vues de recherche (`FeatIndexQuery`, `SpellIndexQuery`, etc.)
-- `Views/`
-  - pages Razor pour les vues de dons, sorts et layout global
-- `App_Data/`
-  - fichiers XML de données : `apg.xml`, `pfrpg.xml`, `uc.xml`, `um.xml`, `bestiary*.xml`
-- `App_Start/`
-  - routing et configuration MVC
-- `Web.config` / `Global.asax`
-  - configuration ASP.NET legacy
-
-## Source de données et fonctionnement
-
-Le cœur de l'application est `MemoryDataSet.LoadDataSet(...)`.
-
-Cette méthode :
-
-1. parcourt les fichiers XML dans `App_Data/`
-2. ne garde que ceux correspondant à des jeux de données connus
-3. les charge via `DataSet.Load(reader)`
-4. fusionne et met en cache le résultat dans un `PathfinderDb.Schema.DataSet`
-
-Les données contenues dans les XML décrivent des éléments comme :
-
-- sorts
-- dons
-- sources / références
-- niveaux, composants, prérequis, descriptions courtes
-- traductions / libellés
-
-Exemple de structure observée dans les XML :
-
-```xml
-<dataSet xmlns="urn:pathfinderDb">
-  <sources>
-    <source id="uc" />
-  </sources>
-  <spells>
-    <spell id="abondance-de-munitions" school="conjuration">
-      <name>Abondance de munitions</name>
-      <levels>
-        <level list="bard" level="1" />
-      </levels>
-      <summary>...</summary>
-    </spell>
-  </spells>
-</dataSet>
-```
-
-Autrement dit, le site n'utilise pas une base de données persistante ; il charge tout en mémoire au démarrage.
-
-## Ce que le site fait
-
-Le site permet de naviguer et filtrer :
-
-- dons (`FeatController`)
-- sorts (`SpellController`)
-
-Les filtres portent sur :
-
-- source / livre
-- type de don
-- attributs requis
-- niveau de classe
-- liste de sort
-- vue liste ou vue tabulaire
-
-L'application expose donc un navigateur de données Pathfinder, à la fois lisible et orienté recherche, mais fortement couplé à la structure XML d'origine.
-
-## Points de fragilité / limites de la solution legacy
-
-- dépendance au framework .NET Framework 4.6 très ancien
-- app monolithique sans séparation `domain / data / api / ui`
-- données statiques dans le dépôt, donc difficilement évolutives/contributives
-- pas de pipeline de validation ni de tests automatisés visibles
-- dépendance implicite à la structure XML de `PathfinderDb.Schema`
-- front-end legacy (Bootstrap + jQuery 2010, rendu server-side Razor)
-- présence de références historiques à `pathfinder-fr.org` et sources externes dans les données
-
-## Ce qu'il faudra faire pour moderniser / réécrire
-
-Le chantier ressemble à une refonte de la source de données et de l'architecture applicative, pas seulement un simple refactor UI.
-
-### Objectif fonctionnel
-
-Créer une nouvelle application qui expose la même base de connaissance Pathfinder, mais avec une source de données plus fiable, plus structurielle et plus maintenable.
-
-### Architecture cible probable
-
-- source canonique de données distincte du front
-- schéma de données explicite (DTO / domain model / database schema)
-- import des données depuis une source fiable (JSON, export, API, ou données structurées)
-- API backend moderne (`ASP.NET Core`, ou équivalent)
-- frontend moderne (React/Vue/Blazor/SSR selon besoin)
-- tests d'intégration sur les imports et les filtres
-
-### Étapes de migration probables
-
-1. cartographier le schéma actuel du dataset XML
-2. définir le nouveau modèle canonique de données
-3. construire un import depuis la nouvelle source
-4. valider les règles métier (sorts, dons, prérequis, sources)
-5. reconstruire les filtres et les vues à partir de ce modèle
-6. moderniser le frontend et l'UX
-7. déployer une version plus robuste et maintenable
-
-## Conclusion
-
-Le projet est un bon exemple de site de navigateur de données historique : fonctionnel, riche en contenu, mais construit autour d'un modèle de données XML legacy et d'un framework web ancien.
-
-La vraie modernisation ne passera pas seulement par un redesign visuel : il faut d'abord remplacer la source de données et séparer clairement le modèle, l'import, l'API et le front.
-
-## Prochaines étapes de travail
-
-- confirmer la nouvelle source de données cible
-- définir le schéma canonique (sorts, dons, sources, références)
-- identifier les différences entre les XML actuels et le format de destination
-- définir l'architecture finale de l'application moderne
-- construire le premier import de données en environnement de test
-
-## Nouvelle application .NET 10
-
-La modernisation est développée en parallèle dans `src/PathfinderDb.Modern` afin
-de préserver l'application MVC 4 existante pendant la transition.
-
-La nouvelle application consomme exclusivement les trois exports JSON racine du
-clone externe `pf1-data` :
-
-- `feats.json`
-- `spells.json`
-- `monsters.json`
-
-Le chemin du clone est configuré par `PathfinderData:RootPath`, ou par la
-variable d'environnement `PathfinderData__RootPath`. La valeur par défaut de
-production est `E:\websites\Pathfinder-FR\pf1-data`. En développement local,
-`appsettings.Development.json` utilise `D:\code\perso\pf\pf1-data`. Les
-fichiers JSON de production ne doivent pas être copiés dans ce dépôt.
-
-Commandes de validation de la fondation moderne :
+La solution courante est `PathfinderDb.sln`. Les commandes principales se
+lancent depuis la racine du dépôt, ou utilisent le chemin de leur propre
+emplacement pour fonctionner depuis un autre répertoire :
 
 ```powershell
-dotnet build src\PathfinderDb.Modern\PathfinderDb.Modern.sln --configuration Release
+.\build.cmd
 dotnet test tests\PathfinderDb.Modern.Tests\PathfinderDb.Modern.Tests.csproj
 ```
 
-Publication IIS de la nouvelle application :
+Le build requiert le SDK .NET 10. Pour lancer le site localement :
 
 ```powershell
-.\scripts\publish-modern.ps1
+dotnet run --project src\PathfinderDb.Web\PathfinderDb.Web.csproj
 ```
 
-Par défaut, le script publie en `Release`, en mode framework-dependent, dans
+## Données
+
+Le site lit `feats.json`, `spells.json`, `monsters.json` et, s’il existe,
+`labels.json` depuis un clone externe de `pf1-data`. Ce clone n’est pas inclus
+dans le dépôt ni dans la sortie de publication. Configure le chemin avec
+`PathfinderData:RootPath` ou `PathfinderData__RootPath`. En production, le
+chemin courant est `E:\websites\Pathfinder-FR\pf1-data`; en développement
+local, `appsettings.Development.json` fournit le chemin de développement.
+
+La publication IIS est framework-dependent. Le serveur doit avoir le Hosting
+Bundle ASP.NET Core .NET 10 et l’AppPool IIS doit être configuré sur **No
+Managed Code**. IIS conserve son chemin actuel :
 `E:\websites\Pathfinder-FR\PathfinderDb.WebExplorer\publish\PathfinderDb.Web`.
-Cette valeur est affichée à chaque lancement. Le script crée le dossier s'il
-n'existe pas, mais ne le supprime pas afin d'éviter les erreurs de fichiers
-verrouillés sous IIS. Le serveur IIS doit
-disposer de l'Hosting Bundle .NET 10 et le pool d'application doit être
-configuré avec **No Managed Code**. Le chemin de données reste externe au
-dossier publié et doit être fourni à IIS via la variable
-`PathfinderData__RootPath`.
+Le compte du site doit fournir `PathfinderData__RootPath` vers le clone de
+données externe.
 
-Pour publier sur le site IIS actif sans arrêter tout son AppPool, le script
-place temporairement `app_offline.htm` dans le dossier de publication. ASP.NET
-Core Module arrête alors l'application, le script attend la libération des
-fichiers (30 secondes par défaut), publie, puis retire le fichier afin que le
-site redémarre à la prochaine requête. Le site affiche une page d'indisponibilité
-pendant le déploiement. Le délai peut être ajusté avec
-`-AppOfflineTimeoutSeconds 60`. Les fichiers obsolètes ne sont pas supprimés :
-retirer manuellement ceux qui ne sont plus utilisés, une fois le déploiement
-terminé.
+## Publication et mise à jour planifiée
 
-Options utiles :
+`publish.bat` publie directement la version présente dans le clone, sans
+opération Git. Le script PowerShell appelé gère `app_offline.htm`, attend la
+libération des fichiers IIS, restaure un éventuel fichier offline préexistant,
+et vérifie `web.config` et le code de sortie de `dotnet publish`.
 
-```powershell
-# Choisir un autre dossier de publication
-.\scripts\publish-modern.ps1 -OutputPath D:\Sites\PathfinderDb.Web
+Pour créer une tâche dans le Planificateur de tâches du serveur, configurer
+l’action pour lancer :
 
-# Publier pour un runtime Windows autonome
-.\scripts\publish-modern.ps1 -Runtime win-x64 -SelfContained
+```text
+E:\websites\Pathfinder-FR\PathfinderDb.WebExplorer\job.cmd
 ```
 
-Le script recrée uniquement le dossier de sortie ciblé, vérifie la présence de
-`web.config` généré pour IIS et n'embarque pas le clone `pf1-data`.
+Le job utilise son propre chemin plutôt que le répertoire de travail du
+Planificateur. Il n’exécute que sur `master`, réinitialise les modifications
+locales des fichiers suivis (`git reset --hard`), effectue
+`git pull --ff-only origin master`, puis publie dans le dossier IIS ci-dessus.
+Les fichiers non suivis ne sont pas supprimés; s’ils empêchent le pull, la
+tâche s’arrête sans publier. Les échecs Git ou de publication sont retournés
+au Planificateur. Le compte qui exécute la tâche doit disposer de Git, du SDK
+.NET 10 et des permissions nécessaires sur le checkout, le clone de données
+et le répertoire publié.
+
+Pour plus de détails sur le chargement des données et les paramètres de
+déploiement, voir [`docs\modern-data-pipeline.md`](docs/modern-data-pipeline.md).

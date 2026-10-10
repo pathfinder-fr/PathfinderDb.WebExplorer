@@ -1,7 +1,8 @@
 # Modern data pipeline
 
-The modern application under `src/PathfinderDb.Modern` runs beside the unchanged
-legacy MVC application. It reads only the three root exports from an external
+The current .NET 10 application lives in `src/PathfinderDb.Web` and
+`src/PathfinderDb.Data`; the former MVC application and its XML files are
+archived under `archive/legacy`. The current site reads only the three root exports from an external
 `pf1-data` clone:
 
 * `feats.json`
@@ -29,9 +30,10 @@ publishes one immutable indexed snapshot. A failed initial load leaves the web
 host running in an explicit `Unavailable` degraded state. A failed later load
 keeps the previous valid snapshot while reporting the failure.
 
-Run unit tests with:
+Build the current solution and run unit tests with:
 
 ```powershell
+.\build.cmd
 dotnet test tests\PathfinderDb.Modern.Tests\PathfinderDb.Modern.Tests.csproj
 ```
 
@@ -166,3 +168,23 @@ ReadyToRun publishes successfully but increases the application payload by about
 51%; startup timing must therefore be measured in the target VM before enabling
 it by default. Full Native AOT remains deferred because Razor Pages compatibility
 has not been established.
+
+## IIS publication
+
+`publish.bat` at the repository root publishes the current site to
+`E:\websites\Pathfinder-FR\PathfinderDb.WebExplorer\publish\PathfinderDb.Web`.
+IIS should point to that directory. The site is framework-dependent and
+requires the ASP.NET Core .NET 10 Hosting Bundle on the server; configure the
+AppPool as **No Managed Code** and provide
+`PathfinderData__RootPath=E:\websites\Pathfinder-FR\pf1-data` to the site.
+The external data clone is not copied into the repository or publish output.
+
+The root `job.cmd` is the noninteractive Task Scheduler entry point for a
+checkout at `E:\websites\Pathfinder-FR\PathfinderDb.WebExplorer`. It resolves
+paths from its own location, requires the checkout to be on `master`, resets
+tracked changes with `git reset --hard`, performs
+`git pull --ff-only origin master`, then calls `publish.bat`. It does not run
+`git clean`; untracked files remain, and a Git failure prevents publication.
+Run this job only on the server checkout: tracked local changes are discarded.
+The scheduled-task account needs Git, the .NET 10 SDK, and access to the
+checkout, external data clone, and IIS publish directory.
