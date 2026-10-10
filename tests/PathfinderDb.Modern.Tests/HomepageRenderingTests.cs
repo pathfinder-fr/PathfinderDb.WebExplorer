@@ -10,7 +10,7 @@ public sealed class HomepageRenderingTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var markup = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Index.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Index.cshtml"));
 
         Assert.Contains("Pathfinder première édition", markup);
         Assert.Contains("Fonds de Pathfinder première édition", markup);
@@ -24,7 +24,7 @@ public sealed class HomepageRenderingTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var markup = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Index.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Index.cshtml"));
 
         Assert.Contains("homepage-technical-status", markup);
         Assert.Contains("Model.Status.GeneratedAt", markup);
@@ -43,10 +43,10 @@ public sealed class HomepageRenderingTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var layout = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Shared", "_Layout.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Shared", "_Layout.cshtml"));
         var homepage = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Index.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Index.cshtml"));
 
         Assert.Contains("Pathfinder première édition", layout);
         Assert.DoesNotContain("catalogStatus", layout);

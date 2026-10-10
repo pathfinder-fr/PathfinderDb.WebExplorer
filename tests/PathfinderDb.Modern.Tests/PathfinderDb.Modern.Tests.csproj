@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PathfinderDb.Modern\PathfinderDb.Data\PathfinderDb.Data.csproj" />
-    <ProjectReference Include="..\..\src\PathfinderDb.Modern\PathfinderDb.Web\PathfinderDb.Web.csproj" />
+    <ProjectReference Include="..\..\src\PathfinderDb.Data\PathfinderDb.Data.csproj" />
+    <ProjectReference Include="..\..\src\PathfinderDb.Web\PathfinderDb.Web.csproj" />
   </ItemGroup>
 </Project>

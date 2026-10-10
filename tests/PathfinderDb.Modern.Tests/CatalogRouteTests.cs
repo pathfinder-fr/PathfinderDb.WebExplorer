@@ -5,13 +5,13 @@ namespace PathfinderDb.Modern.Tests;
 public sealed class CatalogRouteTests
 {
     [Theory]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Feats/ByType.cshtml", "@page \"/dons/type/{type}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Feats/BySource.cshtml", "@page \"/dons/source/{source}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySchool.cshtml", "@page \"/sorts/ecole/{school}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/ByClass.cshtml", "@page \"/sorts/classe/{class}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/BySource.cshtml", "@page \"/sorts/source/{source}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Spells/ByLevel.cshtml", "@page \"/sorts/niveau/{level}\"")]
-    [InlineData("src/PathfinderDb.Modern/PathfinderDb.Web/Pages/Monsters/Detail.cshtml", "@page \"/monstres/detail/{slug}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Feats/ByType.cshtml", "@page \"/dons/type/{type}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Feats/BySource.cshtml", "@page \"/dons/source/{source}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Spells/BySchool.cshtml", "@page \"/sorts/ecole/{school}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Spells/ByClass.cshtml", "@page \"/sorts/classe/{class}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Spells/BySource.cshtml", "@page \"/sorts/source/{source}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Spells/ByLevel.cshtml", "@page \"/sorts/niveau/{level}\"")]
+    [InlineData("src/PathfinderDb.Web/Pages/Monsters/Detail.cshtml", "@page \"/monstres/detail/{slug}\"")]
     public void Dimension_pages_declare_canonical_routes(string relativePath, string route)
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
@@ -26,8 +26,8 @@ public sealed class CatalogRouteTests
     public void Landing_pages_describe_dimension_selection_without_forcing_a_catalog_page()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var feats = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Feats", "Index.cshtml"));
-        var spells = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
+        var feats = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Feats", "Index.cshtml"));
+        var spells = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
 
         Assert.Contains("Par type", feats);
         Assert.Contains("Par école", spells);
@@ -40,7 +40,7 @@ public sealed class CatalogRouteTests
     public void Monster_landing_page_exposes_alphabetical_navigation()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var monsters = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
+        var monsters = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
 
         Assert.Contains("Par ordre alphabétique", monsters);
         Assert.Contains("/monstres/@bucket", monsters);
@@ -52,9 +52,9 @@ public sealed class CatalogRouteTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var pages = new[]
         {
-            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Feats", "Index.cshtml"),
-            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"),
-            Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml")
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Feats", "Index.cshtml"),
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"),
+            Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml")
         };
 
         foreach (var page in pages)
@@ -73,7 +73,7 @@ public sealed class CatalogRouteTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var markup = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages",
+            "src", "PathfinderDb.Web", "Pages",
             relativePage.Replace('/', Path.DirectorySeparatorChar)));
 
         Assert.Contains("@if (Model.CatalogPage is null)", markup);
@@ -86,7 +86,7 @@ public sealed class CatalogRouteTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var stylesheet = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+            "src", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
 
         Assert.Contains(".selection-list", stylesheet);
         Assert.Contains("display: flex", stylesheet);
@@ -102,13 +102,13 @@ public sealed class CatalogRouteTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var stylesheet = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+            "src", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
         var monsters = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Monsters", "Index.cshtml"));
         var spells = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "Spells", "Index.cshtml"));
 
         Assert.Matches(@"\.catalog-list\s*\{[^}]*grid-template-columns:\s*1fr", stylesheet);
         Assert.Contains(".catalog-item", stylesheet);
@@ -124,7 +124,7 @@ public sealed class CatalogRouteTests
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
         var stylesheet = File.ReadAllText(Path.Combine(
             repositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
+            "src", "PathfinderDb.Web", "wwwroot", "css", "site.css"));
 
         Assert.Matches(@"\.site-header\s*\{[^}]*background:\s*#fff", stylesheet);
         Assert.Contains("border-top: 2px solid var(--accent-dark)", stylesheet);
@@ -136,8 +136,8 @@ public sealed class CatalogRouteTests
     public void Detail_pages_render_original_reference_links_when_available()
     {
         var repositoryRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../.."));
-        var feats = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Feats", "Detail.cshtml"));
-        var spells = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Spells", "Detail.cshtml"));
+        var feats = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Feats", "Detail.cshtml"));
+        var spells = File.ReadAllText(Path.Combine(repositoryRoot, "src", "PathfinderDb.Web", "Pages", "Spells", "Detail.cshtml"));
 
         Assert.Contains("Model.Feat.References", feats);
         Assert.Contains("Model.Spell.References", spells);

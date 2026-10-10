@@ -15,6 +15,6 @@
     <PackageReference Include="PathfinderDb.Schema" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PathfinderDb.Modern\PathfinderDb.Data\PathfinderDb.Data.csproj" />
+    <ProjectReference Include="..\..\src\PathfinderDb.Data\PathfinderDb.Data.csproj" />
   </ItemGroup>
 </Project>

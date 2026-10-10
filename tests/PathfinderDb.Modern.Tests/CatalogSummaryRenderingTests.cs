@@ -32,7 +32,7 @@ public sealed class CatalogSummaryRenderingTests
     {
         var imports = File.ReadAllText(Path.Combine(
             RepositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "_ViewImports.cshtml"));
+            "src", "PathfinderDb.Web", "Pages", "_ViewImports.cshtml"));
 
         Assert.Contains("@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers", imports);
     }
@@ -85,11 +85,11 @@ public sealed class CatalogSummaryRenderingTests
     private static string ReadPage(string relativePage) =>
         File.ReadAllText(Path.Combine(
             RepositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages",
+            "src", "PathfinderDb.Web", "Pages",
             relativePage.Replace('/', Path.DirectorySeparatorChar)));
 
     private static string ReadPartial(string name) =>
         File.ReadAllText(Path.Combine(
             RepositoryRoot,
-            "src", "PathfinderDb.Modern", "PathfinderDb.Web", "Pages", "Shared", name));
+            "src", "PathfinderDb.Web", "Pages", "Shared", name));
 }
